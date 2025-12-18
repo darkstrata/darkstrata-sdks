@@ -1,0 +1,59 @@
+[package]
+name = "darkstrata-credential-check"
+version = "0.1.0"
+edition = "2021"
+authors = ["DarkStrata <support@darkstrata.io>"]
+description = "Rust SDK for DarkStrata credential breach checking API with k-anonymity privacy protection"
+license = "MIT"
+repository = "https://github.com/darkstrata/darkstrata-sdks"
+documentation = "https://docs.rs/darkstrata-credential-check"
+readme = "README.md"
+keywords = ["security", "credentials", "breach", "password", "haveibeenpwned"]
+categories = ["authentication", "api-bindings", "cryptography"]
+rust-version = "1.70"
+
+[dependencies]
+# HTTP client
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+
+# Async runtime
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros", "time"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Cryptography
+sha2 = "0.10"
+hmac = "0.12"
+hex = "0.4"
+subtle = "2.5"
+
+# Error handling
+thiserror = "1.0"
+
+# Date/time handling
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+
+# URL handling
+url = "2.5"
+
+[dev-dependencies]
+tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
+wiremock = "0.6"
+rand = "0.8"
+
+[features]
+default = []
+
+[[example]]
+name = "basic_usage"
+path = "examples/basic_usage.rs"
+
+[[example]]
+name = "batch_check"
+path = "examples/batch_check.rs"
+
+[[example]]
+name = "error_handling"
+path = "examples/error_handling.rs"

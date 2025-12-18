@@ -8,6 +8,7 @@ Official SDKs for integrating with [DarkStrata](https://darkstrata.io) services.
 |----------|---------|---------|---------------|
 | Node.js / TypeScript | `@darkstrata/credential-check` | [![npm](https://badge.fury.io/js/%40darkstrata%2Fcredential-check.svg)](https://www.npmjs.com/package/@darkstrata/credential-check) | [README](./node/README.md) |
 | Python | `darkstrata-credential-check` | [![PyPI](https://badge.fury.io/py/darkstrata-credential-check.svg)](https://pypi.org/project/darkstrata-credential-check/) | [README](./python/README.md) |
+| Rust | `darkstrata-credential-check` | [![crates.io](https://img.shields.io/crates/v/darkstrata-credential-check.svg)](https://crates.io/crates/darkstrata-credential-check) | [README](./rust/README.md) |
 | Go | Coming soon | - | - |
 
 ## Credential Check SDK
@@ -19,7 +20,7 @@ Check if credentials have been exposed in data breaches using k-anonymity.
 - **Privacy-first**: Only a 5-character hash prefix is sent to our servers
 - **No credential exposure**: Your passwords never leave your system
 - **Batch processing**: Efficiently check multiple credentials
-- **Full type safety**: TypeScript types and Python type hints included
+- **Full type safety**: TypeScript types, Python type hints, and Rust's strong typing
 
 ### Quick Example
 
@@ -55,6 +56,27 @@ async def main():
 asyncio.run(main())
 ```
 
+#### Rust
+
+```rust
+use darkstrata_credential_check::{DarkStrataCredentialCheck, ClientOptions};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = DarkStrataCredentialCheck::new(
+        ClientOptions::new("your-api-key")
+    )?;
+
+    let result = client.check("user@example.com", "password123", None).await?;
+
+    if result.found {
+        println!("Credential found in breach database!");
+    }
+
+    Ok(())
+}
+```
+
 ### How K-Anonymity Works
 
 ```
@@ -87,6 +109,7 @@ Only **5 characters** of a 64-character hash are sent. This provides:
 
 - [Node.js SDK Documentation](./node/README.md)
 - [Python SDK Documentation](./python/README.md)
+- [Rust SDK Documentation](./rust/README.md)
 - [API Documentation](https://docs.darkstrata.io)
 - [DarkStrata Dashboard](https://app.darkstrata.io)
 
