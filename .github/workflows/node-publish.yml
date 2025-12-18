@@ -50,7 +50,7 @@ jobs:
         run: pnpm run build
 
       - name: Verify package
-        run: pnpm pack --dry-run
+        run: pnpm pack && ls -la *.tgz
 
       - name: Publish to npm (with provenance)
         if: ${{ !inputs.dry-run }}
