@@ -7,7 +7,7 @@ Official SDKs for integrating with [DarkStrata](https://darkstrata.io) services.
 | Language | Package | Version | Documentation |
 |----------|---------|---------|---------------|
 | Node.js / TypeScript | `@darkstrata/credential-check` | [![npm](https://badge.fury.io/js/%40darkstrata%2Fcredential-check.svg)](https://www.npmjs.com/package/@darkstrata/credential-check) | [README](./node/README.md) |
-| Python | Coming soon | - | - |
+| Python | `darkstrata-credential-check` | [![PyPI](https://badge.fury.io/py/darkstrata-credential-check.svg)](https://pypi.org/project/darkstrata-credential-check/) | [README](./python/README.md) |
 | Go | Coming soon | - | - |
 
 ## Credential Check SDK
@@ -19,9 +19,11 @@ Check if credentials have been exposed in data breaches using k-anonymity.
 - **Privacy-first**: Only a 5-character hash prefix is sent to our servers
 - **No credential exposure**: Your passwords never leave your system
 - **Batch processing**: Efficiently check multiple credentials
-- **Full type safety**: Written in TypeScript with comprehensive types
+- **Full type safety**: TypeScript types and Python type hints included
 
-### Quick Example (Node.js)
+### Quick Example
+
+#### Node.js / TypeScript
 
 ```typescript
 import { DarkStrataCredentialCheck } from '@darkstrata/credential-check';
@@ -35,6 +37,22 @@ const result = await client.check('user@example.com', 'password123');
 if (result.found) {
   console.log('Credential found in breach database!');
 }
+```
+
+#### Python
+
+```python
+import asyncio
+from darkstrata_credential_check import DarkStrataCredentialCheck
+
+async def main():
+    async with DarkStrataCredentialCheck(api_key='your-api-key') as client:
+        result = await client.check('user@example.com', 'password123')
+
+        if result.found:
+            print('Credential found in breach database!')
+
+asyncio.run(main())
 ```
 
 ### How K-Anonymity Works
@@ -68,30 +86,13 @@ Only **5 characters** of a 64-character hash are sent. This provides:
 ## Documentation
 
 - [Node.js SDK Documentation](./node/README.md)
+- [Python SDK Documentation](./python/README.md)
 - [API Documentation](https://docs.darkstrata.io)
 - [DarkStrata Dashboard](https://app.darkstrata.io)
 
 ## Contributing
 
 We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/darkstrata/darkstrata-sdks.git
-cd darkstrata-sdks
-
-# Install dependencies for Node SDK
-cd node
-npm install
-
-# Run tests
-npm test
-
-# Build
-npm run build
-```
 
 ## Security
 
