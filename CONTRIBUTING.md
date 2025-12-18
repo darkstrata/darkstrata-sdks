@@ -114,6 +114,19 @@ The Node.js SDK is published to npm using GitHub Actions with provenance attesta
 
 **Note:** The `NPM_TOKEN` secret in the `npm-publish` environment expires after 90 days. Regenerate it on npmjs.com when needed.
 
+### PyPI (Python SDK)
+
+The Python SDK is published to PyPI using trusted publishing (OIDC) - no tokens required.
+
+**Publishing a release:**
+1. Update version in `python/pyproject.toml`
+2. Update `python/CHANGELOG.md`
+3. Commit and push to `main`
+4. Create a GitHub release with tag `python-vX.Y.Z`
+5. The `python-publish.yml` workflow runs automatically
+
+**First-time setup:** Configure trusted publishing on PyPI (see PyPI docs for "Adding a trusted publisher").
+
 ## Questions?
 
 If you have questions about contributing, please open an issue or contact us at support@darkstrata.io.
