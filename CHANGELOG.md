@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/darkstrata/darkstrata-sdks/compare/v1.0.2...v1.0.3) (2025-12-19)
+
+
+### Bug Fixes
+
+* mypy checks were failing ([d9b1703](https://github.com/darkstrata/darkstrata-sdks/commit/d9b1703e6ff114e7f62bd75b044cf11c625acda6))
+
 ## [1.0.2](https://github.com/darkstrata/darkstrata-sdks/compare/v1.0.1...v1.0.2) (2025-12-19)
 
 
