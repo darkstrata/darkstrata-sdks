@@ -450,7 +450,7 @@ describe('DarkStrataCredentialCheck', () => {
       await client.check('user@test.com', 'password');
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('credential-check?prefix='),
+        expect.stringContaining('credential-check/query?prefix='),
         expect.objectContaining({
           method: 'GET',
           headers: expect.objectContaining({

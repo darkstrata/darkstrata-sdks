@@ -78,7 +78,7 @@ class TestCheck:
         hmac_key = "a" * 64
         expected_hmac = hmac_sha256(credential_hash, hmac_key)
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[expected_hmac],
@@ -114,7 +114,7 @@ class TestCheck:
         hmac_key = "b" * 64
 
         # Return hashes that don't match the credential
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[
@@ -159,7 +159,7 @@ class TestCheck:
     @pytest.mark.asyncio
     async def test_should_raise_authentication_error_for_401_response(self) -> None:
         """Should raise AuthenticationError for 401 response."""
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 401,
                 json={"message": "Unauthorized"},
@@ -178,7 +178,7 @@ class TestCheck:
     @pytest.mark.asyncio
     async def test_should_raise_rate_limit_error_for_429_response(self) -> None:
         """Should raise RateLimitError for 429 response."""
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 429,
                 json={"message": "Rate limited"},
@@ -198,7 +198,7 @@ class TestCheck:
     @pytest.mark.asyncio
     async def test_should_raise_api_error_for_other_error_responses(self) -> None:
         """Should raise ApiError for other error responses."""
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 500,
                 json={"message": "Server error"},
@@ -225,7 +225,7 @@ class TestCheckHash:
         hmac_key = "c" * 64
         expected_hmac = hmac_sha256(hash_value, hmac_key)
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[expected_hmac],
@@ -255,7 +255,7 @@ class TestCheckHash:
         hash_value = "a" * 64  # lowercase
         hmac_key = "d" * 64
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -309,7 +309,7 @@ class TestCheckBatch:
 
         hash1 = hash_credential(credentials[0].email, credentials[0].password)
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[hmac_sha256(hash1, hmac_key)],  # Only first credential is compromised
@@ -363,7 +363,7 @@ class TestCaching:
         """Should not cache when disabled."""
         hmac_key = "0" * 64
 
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -410,7 +410,7 @@ class TestCheckOptionsClientHmac:
         """Should include clientHmac in request URL."""
         client_hmac = "a" * 64
 
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -439,7 +439,7 @@ class TestCheckOptionsClientHmac:
         """Should return hmacSource as client when using clientHmac."""
         client_hmac = "b" * 64
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -488,7 +488,7 @@ class TestCheckOptionsClientHmac:
         """Should not cache when clientHmac is provided."""
         client_hmac = "c" * 64
 
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -523,7 +523,7 @@ class TestCheckOptionsSince:
         """Should include since parameter directly when number provided."""
         since_epoch_day = 19724  # 2024-01-01
 
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -553,7 +553,7 @@ class TestCheckOptionsSince:
         """Should return filterSince in metadata."""
         since_epoch_day = 19724
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -589,7 +589,7 @@ class TestCheckOptionsSince:
     @pytest.mark.asyncio
     async def test_should_not_cache_when_since_provided(self) -> None:
         """Should not cache when since is provided."""
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -627,7 +627,7 @@ class TestCheckOptionsCombined:
         client_hmac = "abcdef01" * 8
         since_epoch_day = 19724
 
-        route = respx.get(f"{BASE_URL}credential-check").mock(
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -667,7 +667,7 @@ class TestCheckOptionsCombined:
         hash_value = "A" * 64
         since_epoch_day = 19724
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],
@@ -699,7 +699,7 @@ class TestCheckOptionsCombined:
         ]
         since_epoch_day = 19724
 
-        respx.get(f"{BASE_URL}credential-check").mock(
+        respx.get(f"{BASE_URL}credential-check/query").mock(
             return_value=httpx.Response(
                 200,
                 json=[],

@@ -23,7 +23,7 @@ PREFIX_LENGTH = 5
 TIME_WINDOW_SECONDS = 3600
 
 # API endpoint path for credential checks.
-CREDENTIAL_CHECK_ENDPOINT = "credential-check"
+CREDENTIAL_CHECK_ENDPOINT = "credential-check/query"
 
 # HTTP header name for API key authentication.
 API_KEY_HEADER = "X-Api-Key"

@@ -592,7 +592,7 @@ mod tests {
         let url = client.build_url("5BAA6", None).unwrap();
         assert_eq!(
             url.as_str(),
-            "https://api.darkstrata.io/v1/credential-check?prefix=5BAA6"
+            "https://api.darkstrata.io/v1/credential-check/query?prefix=5BAA6"
         );
 
         // With client HMAC

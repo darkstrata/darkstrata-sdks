@@ -21,7 +21,7 @@ pub const PREFIX_LENGTH: usize = 5;
 pub const TIME_WINDOW_SECONDS: i64 = 3600;
 
 /// The credential check API endpoint.
-pub const CREDENTIAL_CHECK_ENDPOINT: &str = "credential-check";
+pub const CREDENTIAL_CHECK_ENDPOINT: &str = "credential-check/query";
 
 /// HTTP header name for the API key.
 pub const API_KEY_HEADER: &str = "X-Api-Key";

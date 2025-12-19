@@ -33,7 +33,7 @@ export const TIME_WINDOW_SECONDS = 3600;
 /**
  * API endpoint path for credential checks.
  */
-export const CREDENTIAL_CHECK_ENDPOINT = 'credential-check';
+export const CREDENTIAL_CHECK_ENDPOINT = 'credential-check/query';
 
 /**
  * HTTP header name for API key authentication.

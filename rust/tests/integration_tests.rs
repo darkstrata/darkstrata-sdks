@@ -36,7 +36,7 @@ async fn test_check_credential_found() {
     let expected_hmac = crypto_utils::hmac_sha256(&credential_hash, hmac_key).unwrap();
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .and(query_param("prefix", &credential_hash[..5]))
         .and(header("X-Api-Key", "test-api-key"))
         .respond_with(mock_response(
@@ -71,7 +71,7 @@ async fn test_check_credential_not_found() {
     let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(mock_response(
             vec!["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"],
             hmac_key,
@@ -102,7 +102,7 @@ async fn test_check_hash() {
     let expected_hmac = crypto_utils::hmac_sha256(hash, hmac_key).unwrap();
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .and(query_param("prefix", "5BAA6"))
         .respond_with(mock_response(vec![&expected_hmac], hmac_key))
         .expect(1)
@@ -128,7 +128,7 @@ async fn test_batch_check() {
 
     // Set up mock for any prefix
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(mock_response(
             vec!["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"],
             hmac_key,
@@ -162,7 +162,7 @@ async fn test_check_with_since_filter() {
     let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .and(query_param("since", "19724"))
         .respond_with(mock_response(vec![], hmac_key).insert_header("x-filter-since", "19724"))
         .expect(1)
@@ -193,7 +193,7 @@ async fn test_check_with_client_hmac() {
     let client_hmac = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .and(query_param("clientHmac", client_hmac))
         .respond_with(
             ResponseTemplate::new(200)
@@ -228,7 +228,7 @@ async fn test_authentication_error() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(ResponseTemplate::new(401).set_body_string("Unauthorized"))
         .expect(1)
         .mount(&mock_server)
@@ -252,7 +252,7 @@ async fn test_rate_limit_error() {
     let mock_server = MockServer::start().await;
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(
             ResponseTemplate::new(429)
                 .set_body_string("Too Many Requests")
@@ -309,7 +309,7 @@ async fn test_caching() {
     let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(mock_response(vec![], hmac_key))
         .expect(1) // Should only be called once due to caching
         .mount(&mock_server)
@@ -345,7 +345,7 @@ async fn test_cache_disabled_with_options() {
     let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(mock_response(vec![], hmac_key))
         .expect(2) // Should be called twice when options are provided
         .mount(&mock_server)
@@ -378,7 +378,7 @@ async fn test_clear_cache() {
     let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
 
     Mock::given(method("GET"))
-        .and(path("/v1/credential-check"))
+        .and(path("/v1/credential-check/query"))
         .respond_with(mock_response(vec![], hmac_key))
         .expect(2)
         .mount(&mock_server)
