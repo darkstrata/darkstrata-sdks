@@ -303,7 +303,10 @@ mod tests {
             .cache_ttl(Duration::from_secs(1800));
 
         assert_eq!(options.api_key, "test-key");
-        assert_eq!(options.base_url, Some("https://custom.api.com/".to_string()));
+        assert_eq!(
+            options.base_url,
+            Some("https://custom.api.com/".to_string())
+        );
         assert_eq!(options.timeout, Some(Duration::from_secs(60)));
         assert_eq!(options.retries, Some(5));
         assert_eq!(options.enable_caching, Some(false));

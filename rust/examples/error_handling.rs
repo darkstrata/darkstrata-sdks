@@ -10,9 +10,7 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example error_handling
 //! ```
 
-use darkstrata_credential_check::{
-    ClientOptions, DarkStrataCredentialCheck, DarkStrataError,
-};
+use darkstrata_credential_check::{ClientOptions, DarkStrataCredentialCheck, DarkStrataError};
 use std::env;
 use std::time::Duration;
 

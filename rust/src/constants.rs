@@ -27,7 +27,10 @@ pub const CREDENTIAL_CHECK_ENDPOINT: &str = "credential-check";
 pub const API_KEY_HEADER: &str = "X-Api-Key";
 
 /// User-Agent header value.
-pub const USER_AGENT: &str = concat!("darkstrata-credential-check-rust/", env!("CARGO_PKG_VERSION"));
+pub const USER_AGENT: &str = concat!(
+    "darkstrata-credential-check-rust/",
+    env!("CARGO_PKG_VERSION")
+);
 
 /// Response header names.
 pub mod response_headers {

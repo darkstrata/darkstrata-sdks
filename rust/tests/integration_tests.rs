@@ -164,9 +164,7 @@ async fn test_check_with_since_filter() {
     Mock::given(method("GET"))
         .and(path("/v1/credential-check"))
         .and(query_param("since", "19724"))
-        .respond_with(
-            mock_response(vec![], hmac_key).insert_header("x-filter-since", "19724"),
-        )
+        .respond_with(mock_response(vec![], hmac_key).insert_header("x-filter-since", "19724"))
         .expect(1)
         .mount(&mock_server)
         .await;
@@ -282,8 +280,7 @@ async fn test_rate_limit_error() {
 
 #[tokio::test]
 async fn test_validation_errors() {
-    let client =
-        DarkStrataCredentialCheck::new(ClientOptions::new("test-api-key")).unwrap();
+    let client = DarkStrataCredentialCheck::new(ClientOptions::new("test-api-key")).unwrap();
 
     // Empty email
     let result = client.check("", "password", None).await;
@@ -326,10 +323,16 @@ async fn test_caching() {
     .unwrap();
 
     // First call - should hit the server
-    let _ = client.check("test@example.com", "password", None).await.unwrap();
+    let _ = client
+        .check("test@example.com", "password", None)
+        .await
+        .unwrap();
 
     // Second call with same prefix - should use cache
-    let _ = client.check("test@example.com", "password", None).await.unwrap();
+    let _ = client
+        .check("test@example.com", "password", None)
+        .await
+        .unwrap();
 
     // Verify mock was only called once
     // (wiremock will panic if expect(1) is violated)
@@ -389,7 +392,10 @@ async fn test_clear_cache() {
     .unwrap();
 
     // First call
-    let _ = client.check("test@example.com", "password", None).await.unwrap();
+    let _ = client
+        .check("test@example.com", "password", None)
+        .await
+        .unwrap();
     assert_eq!(client.cache_size(), 1);
 
     // Clear cache
@@ -397,7 +403,10 @@ async fn test_clear_cache() {
     assert_eq!(client.cache_size(), 0);
 
     // Second call should hit server again
-    let _ = client.check("test@example.com", "password", None).await.unwrap();
+    let _ = client
+        .check("test@example.com", "password", None)
+        .await
+        .unwrap();
 }
 
 #[test]

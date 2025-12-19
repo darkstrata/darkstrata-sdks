@@ -42,7 +42,10 @@ pub fn hash_credential(email: &str, password: &str) -> String {
 
 /// Extract the k-anonymity prefix from a hash.
 pub fn extract_prefix(hash: &str) -> String {
-    hash.chars().take(PREFIX_LENGTH).collect::<String>().to_uppercase()
+    hash.chars()
+        .take(PREFIX_LENGTH)
+        .collect::<String>()
+        .to_uppercase()
 }
 
 /// Check if a hash exists in a set of HMAC'd hashes using timing-safe comparison.
@@ -51,9 +54,8 @@ pub fn extract_prefix(hash: &str) -> String {
 /// Uses constant-time comparison to prevent timing attacks.
 pub fn is_hash_in_set(hash: &str, hmac_key: &str, hmac_hashes: &[String]) -> Result<bool> {
     let target_hmac = hmac_sha256(hash, hmac_key)?;
-    let target_bytes = hex::decode(&target_hmac).map_err(|e| {
-        DarkStrataError::validation(format!("Failed to decode target HMAC: {}", e))
-    })?;
+    let target_bytes = hex::decode(&target_hmac)
+        .map_err(|e| DarkStrataError::validation(format!("Failed to decode target HMAC: {}", e)))?;
 
     for hmac_hash in hmac_hashes {
         let candidate_bytes = match hex::decode(hmac_hash) {
@@ -109,14 +111,13 @@ pub fn validate_client_hmac(hmac: &str) -> Result<()> {
 }
 
 /// Group credentials by their hash prefix for batch optimization.
-pub fn group_by_prefix(credentials: &[HashedCredential]) -> HashMap<String, Vec<&HashedCredential>> {
+pub fn group_by_prefix(
+    credentials: &[HashedCredential],
+) -> HashMap<String, Vec<&HashedCredential>> {
     let mut groups: HashMap<String, Vec<&HashedCredential>> = HashMap::new();
 
     for cred in credentials {
-        groups
-            .entry(cred.prefix.clone())
-            .or_default()
-            .push(cred);
+        groups.entry(cred.prefix.clone()).or_default().push(cred);
     }
 
     groups
@@ -125,7 +126,10 @@ pub fn group_by_prefix(credentials: &[HashedCredential]) -> HashMap<String, Vec<
 /// Prepare a credential for checking by computing its hash and prefix.
 pub fn prepare_credential(email: &str, password: &str) -> Result<HashedCredential> {
     if email.is_empty() {
-        return Err(DarkStrataError::validation_field("email", "Email is required"));
+        return Err(DarkStrataError::validation_field(
+            "email",
+            "Email is required",
+        ));
     }
     if password.is_empty() {
         return Err(DarkStrataError::validation_field(
@@ -333,17 +337,20 @@ mod tests {
         let creds = vec![
             HashedCredential {
                 credential: None,
-                hash: "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000".to_string(),
+                hash: "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000"
+                    .to_string(),
                 prefix: "5BAA6".to_string(),
             },
             HashedCredential {
                 credential: None,
-                hash: "5BAA71E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000".to_string(),
+                hash: "5BAA71E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000"
+                    .to_string(),
                 prefix: "5BAA7".to_string(),
             },
             HashedCredential {
                 credential: None,
-                hash: "5BAA62E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000".to_string(),
+                hash: "5BAA62E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000"
+                    .to_string(),
                 prefix: "5BAA6".to_string(),
             },
         ];

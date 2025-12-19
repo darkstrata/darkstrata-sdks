@@ -11,9 +11,7 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example basic_usage
 //! ```
 
-use darkstrata_credential_check::{
-    CheckOptions, ClientOptions, DarkStrataCredentialCheck,
-};
+use darkstrata_credential_check::{CheckOptions, ClientOptions, DarkStrataCredentialCheck};
 use std::env;
 
 #[tokio::main]
@@ -36,7 +34,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("   Email: {}", result.credential.email);
     println!("   Found in breach: {}", result.found);
     println!("   Prefix used: {}", result.metadata.prefix);
-    println!("   Total matching hashes: {}", result.metadata.total_results);
+    println!(
+        "   Total matching hashes: {}",
+        result.metadata.total_results
+    );
     println!("   HMAC source: {}", result.metadata.hmac_source);
     println!();
 
@@ -75,10 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let result = client
         .check("user@example.com", "password123", None)
         .await?;
-    println!(
-        "   Result from cache: {}",
-        result.metadata.cached_result
-    );
+    println!("   Result from cache: {}", result.metadata.cached_result);
     println!();
 
     // Clear cache

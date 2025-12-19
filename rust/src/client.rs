@@ -97,7 +97,8 @@ impl DarkStrataCredentialCheck {
         options: Option<CheckOptions>,
     ) -> Result<CheckResult> {
         let hashed = prepare_credential(email, password)?;
-        self.check_hashed_credential(&hashed, options.as_ref()).await
+        self.check_hashed_credential(&hashed, options.as_ref())
+            .await
     }
 
     /// Check if a pre-computed credential hash has been exposed.
@@ -119,7 +120,8 @@ impl DarkStrataCredentialCheck {
         options: Option<CheckOptions>,
     ) -> Result<CheckResult> {
         let hashed = prepare_hash(hash)?;
-        self.check_hashed_credential(&hashed, options.as_ref()).await
+        self.check_hashed_credential(&hashed, options.as_ref())
+            .await
     }
 
     /// Check multiple credentials in a batch.
@@ -220,9 +222,7 @@ impl DarkStrataCredentialCheck {
     }
 
     fn resolve_config(options: ClientOptions) -> Result<ResolvedConfig> {
-        let base_url = normalise_base_url(
-            options.base_url.as_deref().unwrap_or(DEFAULT_BASE_URL),
-        )?;
+        let base_url = normalise_base_url(options.base_url.as_deref().unwrap_or(DEFAULT_BASE_URL))?;
 
         Ok(ResolvedConfig {
             api_key: options.api_key,
@@ -338,7 +338,9 @@ impl DarkStrataCredentialCheck {
         let status = response.status();
 
         if status == reqwest::StatusCode::UNAUTHORIZED {
-            return Err(DarkStrataError::authentication("Invalid or missing API key"));
+            return Err(DarkStrataError::authentication(
+                "Invalid or missing API key",
+            ));
         }
 
         if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
@@ -391,9 +393,10 @@ impl DarkStrataCredentialCheck {
             .and_then(|v| v.parse().ok());
 
         // Parse response body
-        let hashes: Vec<String> = response.json().await.map_err(|e| {
-            DarkStrataError::api(format!("Failed to parse response: {}", e), None)
-        })?;
+        let hashes: Vec<String> = response
+            .json()
+            .await
+            .map_err(|e| DarkStrataError::api(format!("Failed to parse response: {}", e), None))?;
 
         Ok(ApiResponse {
             hashes,
@@ -593,9 +596,8 @@ mod tests {
         );
 
         // With client HMAC
-        let options = CheckOptions::new().client_hmac(
-            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
-        );
+        let options = CheckOptions::new()
+            .client_hmac("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
         let url = client.build_url("5BAA6", Some(&options)).unwrap();
         assert!(url.as_str().contains("clientHmac="));
 

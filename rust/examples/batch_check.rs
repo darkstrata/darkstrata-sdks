@@ -10,9 +10,7 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example batch_check
 //! ```
 
-use darkstrata_credential_check::{
-    ClientOptions, Credential, DarkStrataCredentialCheck,
-};
+use darkstrata_credential_check::{ClientOptions, Credential, DarkStrataCredentialCheck};
 use std::env;
 
 #[tokio::main]
@@ -73,7 +71,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Total credentials checked: {}", credentials.len());
     println!("  Compromised: {}", compromised_count);
     println!("  Safe: {}", credentials.len() - compromised_count);
-    println!("  Unique prefixes (API calls made): {}", unique_prefixes.len());
+    println!(
+        "  Unique prefixes (API calls made): {}",
+        unique_prefixes.len()
+    );
     println!("  Time taken: {:?}", duration);
     println!();
 
