@@ -87,7 +87,7 @@ impl DarkStrataError {
 
     /// Create an API error.
     pub fn api(message: impl Into<String>, status_code: Option<u16>) -> Self {
-        let retryable = status_code.map_or(false, is_retryable_status);
+        let retryable = status_code.is_some_and(is_retryable_status);
         Self::Api {
             message: message.into(),
             status_code,

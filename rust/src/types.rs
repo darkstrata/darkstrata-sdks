@@ -267,6 +267,7 @@ pub(crate) struct ApiResponse {
     /// List of HMAC'd hashes from the API.
     pub hashes: Vec<String>,
     /// The prefix that was queried.
+    #[allow(dead_code)]
     pub prefix: String,
     /// The HMAC key used by the API.
     pub hmac_key: String,
