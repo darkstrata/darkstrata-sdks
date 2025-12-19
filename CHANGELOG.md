@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/darkstrata/darkstrata-sdks/compare/v1.0.0...v1.0.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* workflow fixes. readmes updated ([bc0734e](https://github.com/darkstrata/darkstrata-sdks/commit/bc0734e4ecfc42153582ddc2def6e7397a3bc046))
+
 # 1.0.0 (2025-12-19)
 
 
