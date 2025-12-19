@@ -214,5 +214,5 @@ def is_retryable_error(error: Any) -> bool:
         True if the error is retryable.
     """
     if is_darkstrata_error(error):
-        return error.retryable
+        return bool(error.retryable)
     return False

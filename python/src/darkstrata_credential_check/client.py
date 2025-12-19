@@ -6,7 +6,8 @@ import asyncio
 import re
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from types import TracebackType
+from typing import Dict, List, Literal, Optional, Type
 from urllib.parse import urlencode, urljoin
 
 import httpx
@@ -136,7 +137,12 @@ class DarkStrataCredentialCheck:
         """Enter async context manager."""
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         """Exit async context manager."""
         await self.close()
 
@@ -535,7 +541,9 @@ class DarkStrataCredentialCheck:
         prefix = response.headers.get(ResponseHeaders.PREFIX, "")
         hmac_key = response.headers.get(ResponseHeaders.HMAC_KEY, "")
         hmac_source_raw = response.headers.get(ResponseHeaders.HMAC_SOURCE)
-        hmac_source = "client" if hmac_source_raw == "client" else "server"
+        hmac_source: Literal["server", "client"] = (
+            "client" if hmac_source_raw == "client" else "server"
+        )
         time_window_raw = response.headers.get(ResponseHeaders.TIME_WINDOW)
         total_results_raw = response.headers.get(ResponseHeaders.TOTAL_RESULTS)
         filter_since_raw = response.headers.get(ResponseHeaders.FILTER_SINCE)
