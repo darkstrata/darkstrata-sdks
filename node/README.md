@@ -2,7 +2,7 @@
 
 Check if credentials have been exposed in data breaches using k-anonymity.
 
-[![npm version](https://badge.fury.io/js/%40darkstrata%2Fcredential-check.svg)](https://www.npmjs.com/package/@darkstrata/credential-check)
+[![npm version](https://img.shields.io/npm/v/@darkstrata/credential-check.svg)](https://www.npmjs.com/package/@darkstrata/credential-check)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Features
