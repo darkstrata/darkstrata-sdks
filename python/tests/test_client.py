@@ -361,7 +361,7 @@ class TestCaching:
     @pytest.mark.asyncio
     async def test_should_not_cache_when_disabled(self) -> None:
         """Should not cache when disabled."""
-        hmac_key = "g" * 64
+        hmac_key = "0" * 64
 
         route = respx.get(f"{BASE_URL}credential-check").mock(
             return_value=httpx.Response(
@@ -595,7 +595,7 @@ class TestCheckOptionsSince:
                 json=[],
                 headers={
                     "X-Prefix": "ABCDE",
-                    "X-HMAC-Key": "g" * 64,
+                    "X-HMAC-Key": "1" * 64,
                     "X-HMAC-Source": "server",
                     "X-Time-Window": "12345",
                     "X-Total-Results": "0",
@@ -673,7 +673,7 @@ class TestCheckOptionsCombined:
                 json=[],
                 headers={
                     "X-Prefix": "AAAAA",
-                    "X-HMAC-Key": "i" * 64,
+                    "X-HMAC-Key": "2" * 64,
                     "X-HMAC-Source": "server",
                     "X-Total-Results": "0",
                     "X-Filter-Since": str(since_epoch_day),
@@ -705,7 +705,7 @@ class TestCheckOptionsCombined:
                 json=[],
                 headers={
                     "X-Prefix": "ABCDE",
-                    "X-HMAC-Key": "j" * 64,
+                    "X-HMAC-Key": "3" * 64,
                     "X-HMAC-Source": "server",
                     "X-Total-Results": "0",
                     "X-Filter-Since": str(since_epoch_day),
