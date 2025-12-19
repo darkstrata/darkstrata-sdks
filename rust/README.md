@@ -12,6 +12,11 @@ A Rust SDK for checking if credentials have been exposed in data breaches using 
 - **Type-Safe**: Comprehensive Rust types with full error handling
 - **Zero Unsafe Code**: 100% safe Rust implementation
 
+## Prerequisites
+
+1. **Get an API key** from [https://darkstrata.io](https://darkstrata.io)
+2. Rust 1.70 or higher
+
 ## Installation
 
 Add this to your `Cargo.toml`:

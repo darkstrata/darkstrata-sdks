@@ -15,9 +15,10 @@ Check if credentials have been exposed in data breaches using k-anonymity.
 - **Retry logic**: Built-in exponential backoff for transient failures
 - **Comprehensive errors**: Detailed error types for easy error handling
 
-## Requirements
+## Prerequisites
 
-- Node.js 18.0.0 or higher
+1. **Get an API key** from [https://darkstrata.io](https://darkstrata.io)
+2. Node.js 18.0.0 or higher
 
 ## Installation
 

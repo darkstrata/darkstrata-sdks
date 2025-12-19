@@ -8,7 +8,7 @@ license = "MIT"
 repository = "https://github.com/darkstrata/darkstrata-sdks"
 documentation = "https://docs.rs/darkstrata-credential-check"
 readme = "README.md"
-keywords = ["security", "credentials", "breach", "password", "haveibeenpwned"]
+keywords = ["security", "credentials", "breach", "password", "k-anonymity"]
 categories = ["authentication", "api-bindings", "cryptography"]
 rust-version = "1.70"
 
