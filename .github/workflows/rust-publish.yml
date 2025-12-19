@@ -1,8 +1,9 @@
-name: Publish Rust SDK
+name: Publish Rust SDK (Manual)
+
+# This workflow is for manual re-publishing only.
+# Automatic publishing is handled by the release.yml workflow.
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       dry-run:
