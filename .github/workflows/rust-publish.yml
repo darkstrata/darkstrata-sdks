@@ -39,6 +39,7 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     if: ${{ !inputs.dry-run }}
+    environment: crates-publish
     steps:
       - uses: actions/checkout@v4
 
