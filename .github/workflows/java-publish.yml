@@ -6,6 +6,15 @@ on:
       version:
         required: true
         type: string
+    secrets:
+      OSSRH_USERNAME:
+        required: true
+      OSSRH_PASSWORD:
+        required: true
+      GPG_PRIVATE_KEY:
+        required: true
+      GPG_PASSPHRASE:
+        required: true
 
 defaults:
   run:
@@ -13,12 +22,8 @@ defaults:
 
 jobs:
   publish:
-    name: Publish to GitHub Packages
+    name: Publish to Maven Central
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -29,9 +34,11 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
 
       - name: Update version in pom.xml
         run: mvn versions:set -DnewVersion=${{ inputs.version }} -DgenerateBackupPoms=false
@@ -42,10 +49,9 @@ jobs:
       - name: Run tests
         run: mvn -B test
 
-      - name: Package
-        run: mvn -B package -DskipTests
-
-      - name: Publish to GitHub Packages
-        run: mvn -B deploy -DskipTests
+      - name: Publish to Maven Central
+        run: mvn -B deploy -Prelease -DskipTests
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}

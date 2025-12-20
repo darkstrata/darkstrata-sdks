@@ -4,20 +4,9 @@ Check if credentials have been exposed in data breaches using k-anonymity.
 
 ## Installation
 
-### Maven (GitHub Packages)
+### Maven
 
-Add the GitHub Packages repository to your `pom.xml`:
-
-```xml
-<repositories>
-    <repository>
-        <id>github</id>
-        <url>https://maven.pkg.github.com/darkstrata/darkstrata-sdks</url>
-    </repository>
-</repositories>
-```
-
-Then add the dependency:
+Add the dependency to your `pom.xml`:
 
 ```xml
 <dependency>
@@ -27,23 +16,7 @@ Then add the dependency:
 </dependency>
 ```
 
-### Gradle (GitHub Packages)
-
-Add the repository:
-
-```groovy
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/darkstrata/darkstrata-sdks")
-        credentials {
-            username = project.findProperty("gpr.user") ?: System.getenv("GITHUB_ACTOR")
-            password = project.findProperty("gpr.key") ?: System.getenv("GITHUB_TOKEN")
-        }
-    }
-}
-```
-
-Then add the dependency:
+### Gradle
 
 ```groovy
 implementation 'io.darkstrata:credential-check:1.0.0'
