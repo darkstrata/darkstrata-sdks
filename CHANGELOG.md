@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/darkstrata/darkstrata-sdks/compare/v1.0.3...v1.1.0) (2025-12-20)
+
+
+### Features
+
+* adding new csharp SDK with nuget deployment ([070a60f](https://github.com/darkstrata/darkstrata-sdks/commit/070a60f7f85b78fee64a2b6126172d5e6c151b43))
+
 ## [1.0.3](https://github.com/darkstrata/darkstrata-sdks/compare/v1.0.2...v1.0.3) (2025-12-19)
 
 
