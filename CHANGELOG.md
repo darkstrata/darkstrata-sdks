@@ -1,3 +1,20 @@
+# [1.2.0](https://github.com/darkstrata/darkstrata-sdks/compare/v1.1.1...v1.2.0) (2025-12-21)
+
+
+### Bug Fixes
+
+* batch test needs multiple mock responses for different prefixes ([c2e009f](https://github.com/darkstrata/darkstrata-sdks/commit/c2e009f6a82ee95cac21172980ed81d48a3abb9f))
+* resolve TimeoutException ambiguity in Java SDK ([9f241e7](https://github.com/darkstrata/darkstrata-sdks/commit/9f241e765156c10ba9822000e33669d143c026d1))
+
+
+### Features
+
+* add Go SDK ([4e35c9b](https://github.com/darkstrata/darkstrata-sdks/commit/4e35c9b864e8408d968fbfd2ce6510a0ca66b483))
+* add Java SDK to release workflow ([5e6e7a4](https://github.com/darkstrata/darkstrata-sdks/commit/5e6e7a4287fbf8ea6948c779462486574c9b8d42))
+* adding java SDK ([a6bee0c](https://github.com/darkstrata/darkstrata-sdks/commit/a6bee0c49ea4939a0c360d2a4570077ecf6a3aa5))
+* switch Java SDK publishing to Maven Central ([5946fe2](https://github.com/darkstrata/darkstrata-sdks/commit/5946fe22ce978e0a238d522634ff5733de02505f))
+* update to Sonatype Central Portal publishing ([9e45bd6](https://github.com/darkstrata/darkstrata-sdks/commit/9e45bd69b2fca5eb147908516ba4cc410d2005d9))
+
 ## [1.1.1](https://github.com/darkstrata/darkstrata-sdks/compare/v1.1.0...v1.1.1) (2025-12-20)
 
 
