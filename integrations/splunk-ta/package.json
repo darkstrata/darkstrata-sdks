@@ -1,6 +1,6 @@
 {
   "name": "@darkstrata/splunk-ta",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "DarkStrata Threat Intelligence Add-on for Splunk Enterprise Security",
   "private": true,
   "scripts": {
