@@ -37,7 +37,7 @@ dev = [
     "types-requests>=2.28.0",
 ]
 build = [
-    "splunk-add-on-ucc-framework>=5.30.0",
+    "splunk-add-on-ucc-framework>=6.3.0",
     "splunk-appinspect>=2.30.0",
 ]
 

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-07-31
+
+### Fixed
+
+- Resolved the Splunkbase AppInspect `check_for_custom_mako_templates` finding
+  against 1.1.1. The add-on is now built with UCC framework 6.5.3 (1.1.1 was
+  built with 5.52.0), whose `appserver/templates/base.html` is plain HTML rather
+  than a Mako template, per Splunk's remediation guidance for the Splunk
+  Enterprise 10.4 Mako deprecation. The build floor is raised to
+  `splunk-add-on-ucc-framework>=6.3.0` so a Mako-era build cannot recur.
+
 ## [1.1.1] - 2026-06-26
 
 ### Added

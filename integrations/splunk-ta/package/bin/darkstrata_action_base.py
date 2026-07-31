@@ -29,7 +29,7 @@ except ImportError:
 
 # Constants
 API_TIMEOUT = 30
-USER_AGENT = "Splunk/TA-DarkStrata/1.1.1 (AdaptiveResponse)"
+USER_AGENT = "Splunk/TA-DarkStrata/1.1.2 (AdaptiveResponse)"
 
 # Logger setup
 logger = logging.getLogger(__name__)
