@@ -21,8 +21,15 @@ func main() {
 
 	ctx := context.Background()
 
-	// Check a single credential
-	result, err := client.Check(ctx, "user@example.com", "password123", nil)
+	email, password := "user@example.com", "password123"
+
+	// 1. Hash the credential locally: SHA-256 of "email:password".
+	//    The plaintext email and password never leave this process.
+	hash := credentialcheck.HashCredential(email, password)
+
+	// 2. Check the hash. The SDK sends only the first 5-6 characters (the
+	//    k-anonymity prefix) to the API and compares the full hash locally.
+	result, err := client.CheckHash(ctx, hash, nil)
 	if err != nil {
 		log.Fatalf("Check failed: %v", err)
 	}
@@ -39,7 +46,7 @@ func main() {
 
 	// Check with options
 	since := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
-	resultWithOpts, err := client.Check(ctx, "user@example.com", "password123", &credentialcheck.CheckOptions{
+	resultWithOpts, err := client.CheckHash(ctx, hash, &credentialcheck.CheckOptions{
 		Since: &since,
 	})
 	if err != nil {
@@ -47,13 +54,4 @@ func main() {
 	}
 
 	fmt.Printf("\nWith 'since' filter - Found: %v\n", resultWithOpts.Found)
-
-	// Check a pre-computed hash
-	hash := credentialcheck.HashCredential("user@example.com", "password123")
-	hashResult, err := client.CheckHash(ctx, hash, nil)
-	if err != nil {
-		log.Fatalf("Hash check failed: %v", err)
-	}
-
-	fmt.Printf("\nHash check - Found: %v\n", hashResult.Found)
 }

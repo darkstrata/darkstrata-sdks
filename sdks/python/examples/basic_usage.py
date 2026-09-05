@@ -10,7 +10,7 @@ Run: python examples/basic_usage.py
 import asyncio
 import os
 
-from darkstrata_credential_check import DarkStrataCredentialCheck
+from darkstrata_credential_check import DarkStrataCredentialCheck, hash_credential
 
 
 async def main() -> None:
@@ -25,7 +25,13 @@ async def main() -> None:
         print(f"Checking credential for: {email}")
         print("---")
 
-        result = await client.check(email, password)
+        # 1. Hash the credential locally: SHA-256 of "email:password".
+        #    The plaintext email and password never leave this process.
+        hash_value = hash_credential(email, password)
+
+        # 2. Check the hash. The SDK sends only the first 5-6 characters (the
+        #    k-anonymity prefix) to the API and compares the full hash locally.
+        result = await client.check_hash(hash_value)
 
         if result.found:
             print("WARNING: This credential was found in a data breach!")

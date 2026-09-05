@@ -3,6 +3,10 @@ using DarkStrata.CredentialCheck;
 // Get API key from environment variable (use invalid key for demo)
 var apiKey = Environment.GetEnvironmentVariable("DARKSTRATA_API_KEY") ?? "invalid-key-for-demo";
 
+// Hash the credential once, locally. Only this hash is handed to the client,
+// and only its 5-6 character prefix is ever sent to the API.
+var hash = CryptoUtils.HashCredential("test@example.com", "password");
+
 Console.WriteLine("DarkStrata Credential Check - Error Handling Example");
 Console.WriteLine("=====================================================\n");
 
@@ -32,7 +36,7 @@ Console.WriteLine("--------------------------");
 try
 {
     using var client = new DarkStrataCredentialCheck(new ClientOptions { ApiKey = apiKey });
-    await client.CheckAsync("test@example.com", "password");
+    await client.CheckHashAsync(hash);
 }
 catch (DarkStrataException ex)
 {
@@ -74,7 +78,7 @@ Console.WriteLine();
 Console.WriteLine("3. Retry Logic Example");
 Console.WriteLine("----------------------");
 
-async Task<CheckResult?> CheckWithRetryAsync(DarkStrataCredentialCheck client, string email, string password)
+async Task<CheckResult?> CheckWithRetryAsync(DarkStrataCredentialCheck client, string hash)
 {
     const int maxAttempts = 3;
 
@@ -83,7 +87,7 @@ async Task<CheckResult?> CheckWithRetryAsync(DarkStrataCredentialCheck client, s
         try
         {
             Console.WriteLine($"  Attempt {attempt}...");
-            return await client.CheckAsync(email, password);
+            return await client.CheckHashAsync(hash);
         }
         catch (DarkStrataException ex) when (ex.IsRetryable && attempt < maxAttempts)
         {
@@ -110,7 +114,7 @@ try
         Timeout = TimeSpan.FromSeconds(5)
     });
 
-    var result = await CheckWithRetryAsync(client, "test@example.com", "password");
+    var result = await CheckWithRetryAsync(client, hash);
     Console.WriteLine($"  Result: {(result?.Found == true ? "Found" : "Not found")}");
 }
 catch (Exception ex)
@@ -145,7 +149,7 @@ void HandleError(DarkStrataException ex)
 try
 {
     using var client = new DarkStrataCredentialCheck(new ClientOptions { ApiKey = apiKey });
-    await client.CheckAsync("test@example.com", "password");
+    await client.CheckHashAsync(hash);
 }
 catch (DarkStrataException ex)
 {

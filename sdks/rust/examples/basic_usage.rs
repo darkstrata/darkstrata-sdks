@@ -2,8 +2,7 @@
 //!
 //! This example demonstrates:
 //! - Creating a client with default configuration
-//! - Checking a single credential
-//! - Checking a pre-computed hash
+//! - Hashing a credential locally and checking the hash
 //! - Using check options (date filter, custom HMAC)
 //!
 //! Run with:
@@ -11,7 +10,9 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example basic_usage
 //! ```
 
-use darkstrata_credential_check::{CheckOptions, ClientOptions, DarkStrataCredentialCheck};
+use darkstrata_credential_check::{
+    crypto_utils::hash_credential, CheckOptions, ClientOptions, DarkStrataCredentialCheck,
+};
 use std::env;
 
 #[tokio::main]
@@ -27,11 +28,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 1: Check a single credential
     println!("1. Checking a single credential...");
-    let result = client
-        .check("user@example.com", "password123", None)
-        .await?;
+    let (email, password) = ("user@example.com", "password123");
 
-    println!("   Email: {}", result.credential.email);
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    let hash = hash_credential(email, password);
+    println!("   Hash: {}", hash);
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    let result = client.check_hash(&hash, None).await?;
+
     println!("   Found in breach: {}", result.found);
     println!("   Prefix used: {}", result.metadata.prefix);
     println!(
@@ -41,26 +48,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("   HMAC source: {}", result.metadata.hmac_source);
     println!();
 
-    // Example 2: Check a pre-computed hash
-    println!("2. Checking a pre-computed hash...");
-    // This is the SHA-256 hash of "test@example.com:testpassword"
-    let hash = darkstrata_credential_check::crypto_utils::hash_credential(
-        "test@example.com",
-        "testpassword",
-    );
-    println!("   Hash: {}", hash);
-
-    let result = client.check_hash(&hash, None).await?;
-    println!("   Found in breach: {}", result.found);
-    println!();
-
-    // Example 3: Check with date filter (breaches since January 2024)
-    println!("3. Checking with date filter...");
+    // Example 2: Check with date filter (breaches since January 2024)
+    println!("2. Checking with date filter...");
     let options = CheckOptions::new().since_epoch_day(19724); // 2024-01-01
 
-    let result = client
-        .check("user@example.com", "password123", Some(options))
-        .await?;
+    let result = client.check_hash(&hash, Some(options)).await?;
 
     println!("   Found in breach (since 2024-01-01): {}", result.found);
     if let Some(since) = result.metadata.filter_since {
@@ -68,14 +60,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     println!();
 
-    // Example 4: Check cache status
-    println!("4. Cache status:");
+    // Example 3: Check cache status
+    println!("3. Cache status:");
     println!("   Cached entries: {}", client.cache_size());
 
     // Perform same check again to see caching in action
-    let result = client
-        .check("user@example.com", "password123", None)
-        .await?;
+    let result = client.check_hash(&hash, None).await?;
     println!("   Result from cache: {}", result.metadata.cached_result);
     println!();
 
