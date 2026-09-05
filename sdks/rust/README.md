@@ -30,7 +30,7 @@ tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
 ## Quick Start
 
 ```rust
-use darkstrata_credential_check::{DarkStrataCredentialCheck, ClientOptions};
+use darkstrata_credential_check::{crypto_utils::hash_credential, ClientOptions, DarkStrataCredentialCheck};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,8 +39,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ClientOptions::new("your-api-key")
     )?;
 
-    // Check a single credential
-    let result = client.check("user@example.com", "password123", None).await?;
+    // email and password come from your login form and are only ever used here.
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    let hash = hash_credential(&email, &password);
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    let result = client.check_hash(&hash, None).await?;
 
     if result.found {
         println!("This credential has been compromised!");

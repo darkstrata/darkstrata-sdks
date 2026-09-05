@@ -56,13 +56,20 @@ This monorepo contains everything you need to integrate with DarkStrata:
 #### Node.js / TypeScript
 
 ```typescript
-import { DarkStrataCredentialCheck } from '@darkstrata/credential-check';
+import { DarkStrataCredentialCheck, hashCredential } from '@darkstrata/credential-check';
 
 const client = new DarkStrataCredentialCheck({
   apiKey: 'your-api-key',
 });
 
-const result = await client.check('user@example.com', 'password123');
+// email and password come from your login form and are only ever used here.
+// 1. Hash the credential locally: SHA-256 of "email:password".
+//    The plaintext email and password never leave this process.
+const hash = hashCredential(email, password);
+
+// 2. Check the hash. The SDK sends only the first 5-6 characters (the
+//    k-anonymity prefix) to the API and compares the full hash locally.
+const result = await client.checkHash(hash);
 
 if (result.found) {
   console.log('Credential found in breach database!');
@@ -73,11 +80,18 @@ if (result.found) {
 
 ```python
 import asyncio
-from darkstrata_credential_check import DarkStrataCredentialCheck
+from darkstrata_credential_check import DarkStrataCredentialCheck, hash_credential
 
 async def main():
     async with DarkStrataCredentialCheck(api_key='your-api-key') as client:
-        result = await client.check('user@example.com', 'password123')
+        # email and password come from your login form and are only ever used here.
+        # 1. Hash the credential locally: SHA-256 of "email:password".
+        #    The plaintext email and password never leave this process.
+        hash_value = hash_credential(email, password)
+
+        # 2. Check the hash. The SDK sends only the first 5-6 characters (the
+        #    k-anonymity prefix) to the API and compares the full hash locally.
+        result = await client.check_hash(hash_value)
 
         if result.found:
             print('Credential found in breach database!')
@@ -88,7 +102,7 @@ asyncio.run(main())
 #### Rust
 
 ```rust
-use darkstrata_credential_check::{DarkStrataCredentialCheck, ClientOptions};
+use darkstrata_credential_check::{crypto_utils::hash_credential, ClientOptions, DarkStrataCredentialCheck};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -96,7 +110,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ClientOptions::new("your-api-key")
     )?;
 
-    let result = client.check("user@example.com", "password123", None).await?;
+    // email and password come from your login form and are only ever used here.
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    let hash = hash_credential(&email, &password);
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    let result = client.check_hash(&hash, None).await?;
 
     if result.found {
         println!("Credential found in breach database!");
@@ -116,7 +137,14 @@ using var client = new DarkStrataCredentialCheck(new ClientOptions
     ApiKey = "your-api-key"
 });
 
-var result = await client.CheckAsync("user@example.com", "password123");
+// email and password come from your login form and are only ever used here.
+// 1. Hash the credential locally: SHA-256 of "email:password".
+//    The plaintext email and password never leave this process.
+var hash = CryptoUtils.HashCredential(email, password);
+
+// 2. Check the hash. The SDK sends only the first 5-6 characters (the
+//    k-anonymity prefix) to the API and compares the full hash locally.
+var result = await client.CheckHashAsync(hash);
 
 if (result.Found)
 {
@@ -145,7 +173,14 @@ func main() {
         log.Fatal(err)
     }
 
-    result, err := client.Check(context.Background(), "user@example.com", "password123", nil)
+    // email and password come from your login form and are only ever used here.
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    hash := credentialcheck.HashCredential(email, password)
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    result, err := client.CheckHash(context.Background(), hash, nil)
     if err != nil {
         log.Fatal(err)
     }
@@ -166,7 +201,14 @@ public class Example {
         try (DarkStrataCredentialCheck client = new DarkStrataCredentialCheck(
                 ClientOptions.builder("your-api-key").build()
         )) {
-            CheckResult result = client.check("user@example.com", "password123");
+            // email and password come from your login form and are only ever used here.
+            // 1. Hash the credential locally: SHA-256 of "email:password".
+            //    The plaintext email and password never leave this process.
+            String hash = CryptoUtils.hashCredential(email, password);
+
+            // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+            //    k-anonymity prefix) to the API and compares the full hash locally.
+            CheckResult result = client.checkHash(hash);
 
             if (result.isFound()) {
                 System.out.println("Credential found in breach database!");

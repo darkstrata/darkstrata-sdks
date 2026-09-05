@@ -32,7 +32,14 @@ public class Example {
         try (DarkStrataCredentialCheck client = new DarkStrataCredentialCheck(
                 ClientOptions.builder("your-api-key").build()
         )) {
-            CheckResult result = client.check("user@example.com", "password123");
+            // email and password come from your login form and are only ever used here.
+            // 1. Hash the credential locally: SHA-256 of "email:password".
+            //    The plaintext email and password never leave this process.
+            String hash = CryptoUtils.hashCredential(email, password);
+
+            // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+            //    k-anonymity prefix) to the API and compares the full hash locally.
+            CheckResult result = client.checkHash(hash);
 
             if (result.isFound()) {
                 System.out.println("Credential found in breach database!");

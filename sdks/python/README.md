@@ -38,13 +38,19 @@ uv add darkstrata-credential-check
 
 ```python
 import asyncio
-from darkstrata_credential_check import DarkStrataCredentialCheck
+from darkstrata_credential_check import DarkStrataCredentialCheck, hash_credential
 
 async def main():
     # Create a client
     async with DarkStrataCredentialCheck(api_key='your-api-key') as client:
-        # Check a single credential
-        result = await client.check('user@example.com', 'password123')
+        # email and password come from your login form and are only ever used here.
+        # 1. Hash the credential locally: SHA-256 of "email:password".
+        #    The plaintext email and password never leave this process.
+        hash_value = hash_credential(email, password)
+
+        # 2. Check the hash. The SDK sends only the first 5-6 characters (the
+        #    k-anonymity prefix) to the API and compares the full hash locally.
+        result = await client.check_hash(hash_value)
 
         if result.found:
             print('WARNING: This credential was found in a data breach!')

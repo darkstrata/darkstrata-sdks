@@ -51,8 +51,14 @@ using var client = new DarkStrataCredentialCheck(new ClientOptions
     ApiKey = Environment.GetEnvironmentVariable("DARKSTRATA_API_KEY")!
 });
 
-// Check a credential
-var result = await client.CheckAsync("user@example.com", "password123");
+// email and password come from your login form and are only ever used here.
+// 1. Hash the credential locally: SHA-256 of "email:password".
+//    The plaintext email and password never leave this process.
+var hash = CryptoUtils.HashCredential(email, password);
+
+// 2. Check the hash. The SDK sends only the first 5-6 characters (the
+//    k-anonymity prefix) to the API and compares the full hash locally.
+var result = await client.CheckHashAsync(hash);
 
 if (result.Found)
 {
