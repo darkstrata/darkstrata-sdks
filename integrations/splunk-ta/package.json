@@ -14,7 +14,7 @@
     "format:check": "ruff format --check package/bin tests",
     "typecheck": "mypy package/bin",
     "validate": "splunk-appinspect inspect output/TA-darkstrata --mode precert --included-tags cloud",
-    "package": "cd output && tar -czvf TA-darkstrata-$(cat ../app.manifest | jq -r '.info.id.version').tar.gz TA-darkstrata"
+    "package": "cd output && COPYFILE_DISABLE=1 tar -czvf TA-darkstrata-$(cat ../app.manifest | jq -r '.info.id.version').tar.gz TA-darkstrata"
   },
   "repository": {
     "type": "git",
