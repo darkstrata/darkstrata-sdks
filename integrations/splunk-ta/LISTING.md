@@ -4,6 +4,7 @@ Paste-ready copy for the Splunkbase listing of the **DarkStrata Threat
 Intelligence Add-on for Splunk**. Keep this in sync with `CHANGELOG.md`,
 `README.md` and `app.manifest` when the add-on changes.
 
+- **Live listing:** [https://splunkbase.splunk.com/app/8955](https://splunkbase.splunk.com/app/8955)
 - **App name:** DarkStrata Threat Intelligence Add-on for Splunk
 - **Content type:** Add-on
 - **Spelling:** British English (organisation, licence)

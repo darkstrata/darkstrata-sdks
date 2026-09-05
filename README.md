@@ -209,7 +209,8 @@ Ingest DarkStrata threat intelligence into Splunk Enterprise Security. The Techn
 
 | | |
 |---|---|
-| **Compatibility** | Splunk Enterprise 8.2+, Splunk Cloud, ES 7.0+ (optional) |
+| **Splunkbase** | [DarkStrata Threat Intelligence Add-on for Splunk](https://splunkbase.splunk.com/app/8955) |
+| **Compatibility** | Splunk Enterprise 9.0+, Splunk Cloud, ES 7.0+ (optional) |
 | **Data Models** | CIM-compliant: Authentication, Threat Intelligence |
 | **Formats** | Native STIX 2.1 ingestion |
 | **Documentation** | [Full Splunk TA guide](./integrations/splunk-ta/README.md) |
@@ -225,7 +226,7 @@ Ingest DarkStrata threat intelligence into Splunk Enterprise Security. The Techn
 
 #### Quick Install
 
-1. Download the latest release from [GitHub Releases](https://github.com/drb/darkstrata-sdks/releases?q=splunk-ta) or search for "DarkStrata" on Splunkbase
+1. Install from [Splunkbase](https://splunkbase.splunk.com/app/8955), or download the latest release from [GitHub Releases](https://github.com/darkstrata/darkstrata-sdks/releases?q=splunk-ta)
 2. Install via **Apps** > **Manage Apps** > **Install app from file**, or extract to `$SPLUNK_HOME/etc/apps/`
 3. Navigate to the **DarkStrata Technology Add-on** and configure your account:
    - **API Base URL**: `https://api.darkstrata.io/v1`
