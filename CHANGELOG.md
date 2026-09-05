@@ -1,3 +1,23 @@
+# [2.2.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.1.0...v2.2.0) (2026-09-05)
+
+
+### Bug Fixes
+
+* **splunk-ta:** align pinned libs with ucc-gen 6.5.1 build requirement ([a2cf765](https://github.com/darkstrata/darkstrata-sdks/commit/a2cf765bf978c5ac7e5f4288f842a3c4fa21b743))
+* **splunk-ta:** correct privacy policy and docs homepage URLs ([#6](https://github.com/darkstrata/darkstrata-sdks/issues/6)) ([b2a59a7](https://github.com/darkstrata/darkstrata-sdks/commit/b2a59a7388f616fab85cbcc716b256572dd9b97a))
+* **splunk-ta:** declare python.required for Splunk 10.2+ forward compatibility ([9764bb2](https://github.com/darkstrata/darkstrata-sdks/commit/9764bb251feda7c0e753288ccc11e6f8c8184018))
+* **splunk-ta:** pass SLIM validation for Splunkbase Enterprise vetting ([#7](https://github.com/darkstrata/darkstrata-sdks/issues/7)) ([f736ed3](https://github.com/darkstrata/darkstrata-sdks/commit/f736ed3df013184967d550a02dd76499d74f304d))
+* **splunk-ta:** pin vendored libs and track the lib manifest ([e542e4d](https://github.com/darkstrata/darkstrata-sdks/commit/e542e4dea13b569d874969f6914eabaa9b748b02))
+* **splunk-ta:** rebuild 1.1.2 with UCC 6.5.3 to clear Mako template finding ([#9](https://github.com/darkstrata/darkstrata-sdks/issues/9)) ([8ae7b4a](https://github.com/darkstrata/darkstrata-sdks/commit/8ae7b4a8cfc4ba7aefba66153cf5cb7b11791587))
+* **splunk-ta:** resolve marketplace blockers and raise test coverage ([13e7c7a](https://github.com/darkstrata/darkstrata-sdks/commit/13e7c7a7e5fb2a300df9bc96406a9aa8a15d36c4))
+* **splunk-ta:** strip AppleDouble files from tarball and align platform floor to Splunk 9.0 ([#10](https://github.com/darkstrata/darkstrata-sdks/issues/10)) ([1cd784e](https://github.com/darkstrata/darkstrata-sdks/commit/1cd784ea19cab914fbec88d813f95b34e93762fc))
+* **splunk-ta:** strip stale bytecode before packaging in release workflow ([50ca795](https://github.com/darkstrata/darkstrata-sdks/commit/50ca795869d761cff3ba4b7631a301e324e31992))
+
+
+### Features
+
+* **splunk-ta:** add app icons and fix alert-action icon path ([c2a8324](https://github.com/darkstrata/darkstrata-sdks/commit/c2a8324792c4421eb04de5d99834f88f288f08ab))
+
 # [2.1.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.0.2...v2.1.0) (2026-03-23)
 
 
