@@ -96,6 +96,13 @@ List<Credential> credentials = Arrays.asList(
 
 List<CheckResult> results = client.checkBatch(credentials);
 
+// Or hash locally first and batch-check the hashes (results are in input order)
+List<String> hashes = new ArrayList<>();
+for (Credential c : credentials) {
+    hashes.add(CryptoUtils.hashCredential(c.getEmail(), c.getPassword()));
+}
+results = client.checkHashBatch(hashes);
+
 for (int i = 0; i < results.size(); i++) {
     CheckResult result = results.get(i);
     if (result.isFound()) {

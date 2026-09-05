@@ -137,6 +137,35 @@ public class HttpClientTests : IDisposable
     }
 
     [Fact]
+    public async Task CheckHashBatchAsync_ChecksPrecomputedHashes()
+    {
+        var hash1 = CryptoUtils.HashCredential("user1@test.com", "pass1");
+        var hash2 = CryptoUtils.HashCredential("user2@test.com", "pass2");
+        var hmacKey = new string('A', 64);
+
+        _handler.SetResponse(HttpStatusCode.OK,
+            JsonSerializer.Serialize(new[] { CryptoUtils.HmacSha256(hash1, hmacKey) }),
+            new Dictionary<string, string>
+            {
+                ["X-Prefix"] = CryptoUtils.ExtractPrefix(hash1),
+                ["X-HMAC-Key"] = hmacKey,
+                ["X-HMAC-Source"] = "server",
+                ["X-Total-Results"] = "1"
+            });
+
+        var results = await _client.CheckHashBatchAsync(new[] { hash1.ToLowerInvariant(), hash2 });
+
+        Assert.Equal(2, results.Count);
+        Assert.True(results[0].Found);
+        Assert.Equal("[hash-only]", results[0].Email);
+        Assert.False(results[1].Found);
+
+        Assert.Empty(await _client.CheckHashBatchAsync(Array.Empty<string>()));
+        await Assert.ThrowsAsync<ValidationException>(() =>
+            _client.CheckHashBatchAsync(new[] { hash1, new string('G', 64) }));
+    }
+
+    [Fact]
     public async Task CheckBatchAsync_ReturnsResultsInOrder()
     {
         var hmacKey = new string('A', 64);

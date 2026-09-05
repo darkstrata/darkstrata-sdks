@@ -28,10 +28,17 @@ func main() {
 		{Email: "diana@example.com", Password: "diana000"},
 	}
 
-	// Check all credentials in batch
-	// The SDK automatically groups credentials by hash prefix
-	// to minimize API calls
-	results, err := client.CheckBatch(ctx, credentials, nil)
+	// 1. Hash every credential locally. Only the hashes are handed to the client;
+	//    the plaintext emails and passwords never leave this process.
+	hashes := make([]string, len(credentials))
+	for i, cred := range credentials {
+		hashes[i] = credentialcheck.HashCredential(cred.Email, cred.Password)
+	}
+
+	// 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+	//    prefix, fetches each prefix once, and compares the full hashes locally.
+	//    results[i] corresponds to hashes[i] (and so to credentials[i]).
+	results, err := client.CheckHashBatch(ctx, hashes, nil)
 	if err != nil {
 		log.Fatalf("Batch check failed: %v", err)
 	}

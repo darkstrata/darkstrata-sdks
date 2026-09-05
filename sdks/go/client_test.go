@@ -119,6 +119,21 @@ func TestCheckBatchValidation(t *testing.T) {
 	}
 }
 
+func TestCheckHashBatchValidation(t *testing.T) {
+	client, _ := NewClient(ClientOptions{APIKey: "test-key"})
+	ctx := context.Background()
+
+	results, err := client.CheckHashBatch(ctx, []string{}, nil)
+	if err != nil || len(results) != 0 {
+		t.Errorf("CheckHashBatch() with empty slice should return empty results, got %v, %v", results, err)
+	}
+
+	_, err = client.CheckHashBatch(ctx, []string{HashCredential("a@test.com", "pass"), "not-a-hash"}, nil)
+	if _, ok := err.(*ValidationError); !ok {
+		t.Errorf("CheckHashBatch() should return ValidationError for invalid hash, got %v", err)
+	}
+}
+
 func TestCacheOperations(t *testing.T) {
 	client, _ := NewClient(ClientOptions{APIKey: "test-key"})
 

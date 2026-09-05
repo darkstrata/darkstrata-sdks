@@ -147,6 +147,17 @@ const results = await client.checkBatch([
 
 **Returns:** `Promise<CheckResult[]>`
 
+##### `checkHashBatch(hashes, options?)`
+
+Check multiple pre-computed hashes efficiently. Results are in input order with `credential.email` set to `[hash-only]`.
+
+```typescript
+const hashes = credentials.map((c) => hashCredential(c.email, c.password));
+const results = await client.checkHashBatch(hashes);
+```
+
+**Returns:** `Promise<CheckResult[]>`
+
 ##### `clearCache()`
 
 Clear the internal response cache.

@@ -11,7 +11,7 @@ import asyncio
 import os
 import time
 
-from darkstrata_credential_check import Credential, DarkStrataCredentialCheck
+from darkstrata_credential_check import Credential, DarkStrataCredentialCheck, hash_credential
 
 
 async def main() -> None:
@@ -30,9 +30,15 @@ async def main() -> None:
         print(f"Checking {len(credentials)} credentials...")
         print("---")
 
-        # Check all credentials in a batch
+        # 1. Hash every credential locally. Only the hashes are handed to the client;
+        #    the plaintext emails and passwords never leave this process.
+        hashes = [hash_credential(c.email, c.password) for c in credentials]
+
+        # 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+        #    prefix, fetches each prefix once, and compares the full hashes locally.
+        #    results[i] corresponds to hashes[i] (and so to credentials[i]).
         start_time = time.time()
-        results = await client.check_batch(credentials)
+        results = await client.check_hash_batch(hashes)
         duration_ms = (time.time() - start_time) * 1000
 
         # Process results
@@ -42,9 +48,9 @@ async def main() -> None:
         print(f"\nResults (completed in {duration_ms:.0f}ms):")
         print("")
 
-        for result in results:
+        for i, result in enumerate(results):
             status = "COMPROMISED" if result.found else "Safe"
-            print(f"  {result.credential.email}: {status}")
+            print(f"  {credentials[i].email}: {status}")
 
         print("")
         print("Summary:")

@@ -279,7 +279,7 @@ class DarkStrataCredentialCheck:
             self._validate_credential(credential.email, credential.password)
         self._validate_check_options(options)
 
-        # Hash all credentials and group by prefix
+        # Hash all credentials
         hashed_credentials = [
             HashedCredential(
                 email=cred.email,
@@ -289,6 +289,57 @@ class DarkStrataCredentialCheck:
             for cred in credentials
         ]
 
+        return await self._check_hashed_batch(hashed_credentials, options)
+
+    async def check_hash_batch(
+        self,
+        hashes: list[str],
+        options: CheckOptions | None = None,
+    ) -> list[CheckResult]:
+        """
+        Check multiple pre-computed hashes in a single batch.
+
+        Use this method if you've already computed the SHA-256 hashes of the
+        credentials (`email:password`), for example with `hash_credential`.
+        Hashes are grouped by prefix to minimise API calls.
+
+        Args:
+            hashes: List of SHA-256 hashes (64 hex characters each).
+            options: Optional check options applied to all hashes.
+
+        Returns:
+            A list of CheckResult objects, one per hash, in input order.
+
+        Raises:
+            ValidationError: If any hash is invalid.
+
+        Example:
+            >>> hashes = [hash_credential(c.email, c.password) for c in credentials]
+            >>> results = await client.check_hash_batch(hashes)
+        """
+        if not hashes:
+            return []
+
+        hashed_credentials: list[HashedCredential] = []
+        for hash_value in hashes:
+            normalised_hash = hash_value.upper()
+            if not is_valid_hash(normalised_hash):
+                raise ValidationError(
+                    "Invalid hash format. Expected 64 hexadecimal characters.",
+                    field="hash",
+                )
+            hashed_credentials.append(
+                HashedCredential(email=None, password="", hash_value=normalised_hash)
+            )
+        self._validate_check_options(options)
+
+        return await self._check_hashed_batch(hashed_credentials, options)
+
+    async def _check_hashed_batch(
+        self,
+        hashed_credentials: list[HashedCredential],
+        options: CheckOptions | None,
+    ) -> list[CheckResult]:
         grouped_by_prefix = group_by_prefix(hashed_credentials)
 
         # Fetch data for each unique prefix

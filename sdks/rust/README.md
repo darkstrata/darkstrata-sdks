@@ -194,6 +194,7 @@ The main client for interacting with the DarkStrata API.
 | `check(email, password, options)` | Check a single credential |
 | `check_hash(hash, options)` | Check a pre-computed hash |
 | `check_batch(credentials, options)` | Check multiple credentials |
+| `check_hash_batch(hashes, options)` | Check multiple pre-computed hashes |
 | `clear_cache()` | Clear the response cache |
 | `cache_size()` | Get the current cache size |
 

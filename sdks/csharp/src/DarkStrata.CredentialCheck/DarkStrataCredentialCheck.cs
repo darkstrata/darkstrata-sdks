@@ -171,11 +171,60 @@ public sealed partial class DarkStrataCredentialCheck : IDisposable
         }
         ValidateCheckOptions(options);
 
-        // Hash all credentials and group by prefix
+        // Hash all credentials
         var hashedCredentials = credentialList
-            .Select(c => new HashedCredential(c.Email, c.Password, CryptoUtils.HashCredential(c.Email, c.Password)))
+            .Select(c => new HashedCredential(c.Email, CryptoUtils.HashCredential(c.Email, c.Password)))
             .ToList();
 
+        return await CheckHashedBatchAsync(hashedCredentials, options, cancellationToken);
+    }
+
+    /// <summary>
+    /// Checks multiple pre-computed hashes in a single batch.
+    /// </summary>
+    /// <remarks>
+    /// Use this if you've already computed the SHA-256 hashes of the credentials
+    /// (<c>email:password</c>), for example with <see cref="CryptoUtils.HashCredential"/>.
+    /// Hashes are grouped by prefix to minimise API calls. Results are returned in
+    /// input order with <c>[hash-only]</c> as the email.
+    /// </remarks>
+    /// <param name="hashes">SHA-256 hashes, 64 hex characters each.</param>
+    /// <param name="options">Optional check options applied to all hashes.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Check results in input order.</returns>
+    /// <exception cref="ValidationException">Thrown when any hash is invalid.</exception>
+    public async Task<IReadOnlyList<CheckResult>> CheckHashBatchAsync(
+        IEnumerable<string> hashes,
+        CheckOptions? options = null,
+        CancellationToken cancellationToken = default)
+    {
+        var hashedCredentials = new List<HashedCredential>();
+        foreach (var hash in hashes)
+        {
+            var normalizedHash = hash.ToUpperInvariant();
+            if (!CryptoUtils.IsValidHash(normalizedHash))
+            {
+                throw new ValidationException(
+                    "Invalid hash format. Expected 64 hexadecimal characters.",
+                    "hash");
+            }
+            hashedCredentials.Add(new HashedCredential(null, normalizedHash));
+        }
+
+        if (hashedCredentials.Count == 0)
+        {
+            return Array.Empty<CheckResult>();
+        }
+        ValidateCheckOptions(options);
+
+        return await CheckHashedBatchAsync(hashedCredentials, options, cancellationToken);
+    }
+
+    private async Task<IReadOnlyList<CheckResult>> CheckHashedBatchAsync(
+        List<HashedCredential> hashedCredentials,
+        CheckOptions? options,
+        CancellationToken cancellationToken)
+    {
         var groupedByPrefix = CryptoUtils.GroupByPrefix(hashedCredentials, hc => hc.Hash);
 
         // Fetch data for each unique prefix in parallel
@@ -755,5 +804,5 @@ public sealed partial class DarkStrataCredentialCheck : IDisposable
 
     private sealed record CacheEntry(ApiResponse Response, int TimeWindow, DateTimeOffset CreatedAt);
 
-    private sealed record HashedCredential(string Email, string Password, string Hash);
+    private sealed record HashedCredential(string? Email, string Hash);
 }

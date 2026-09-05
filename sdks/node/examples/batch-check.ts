@@ -7,7 +7,7 @@
  * Run: npx tsx examples/batch-check.ts
  */
 
-import { DarkStrataCredentialCheck } from '../src/index.js';
+import { DarkStrataCredentialCheck, hashCredential } from '../src/index.js';
 
 async function main() {
   // Create a client
@@ -26,9 +26,15 @@ async function main() {
   console.log(`Checking ${credentials.length} credentials...`);
   console.log('---');
 
-  // Check all credentials in a batch
+  // 1. Hash every credential locally. Only the hashes are handed to the client;
+  //    the plaintext emails and passwords never leave this process.
+  const hashes = credentials.map((c) => hashCredential(c.email, c.password));
+
+  // 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+  //    prefix, fetches each prefix once, and compares the full hashes locally.
+  //    results[i] corresponds to hashes[i] (and so to credentials[i]).
   const startTime = Date.now();
-  const results = await client.checkBatch(credentials);
+  const results = await client.checkHashBatch(hashes);
   const duration = Date.now() - startTime;
 
   // Process results
@@ -38,10 +44,10 @@ async function main() {
   console.log(`\nResults (completed in ${duration}ms):`);
   console.log('');
 
-  for (const result of results) {
+  results.forEach((result, i) => {
     const status = result.found ? '⚠️  COMPROMISED' : '✓  Safe';
-    console.log(`  ${result.credential.email}: ${status}`);
-  }
+    console.log(`  ${credentials[i]!.email}: ${status}`);
+  });
 
   console.log('');
   console.log('Summary:');

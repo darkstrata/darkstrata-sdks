@@ -333,6 +333,41 @@ class TestCheckBatch:
             assert results[0].credential.email == "user1@test.com"
 
     @pytest.mark.asyncio
+    @respx.mock
+    async def test_check_hash_batch_checks_precomputed_hashes(self) -> None:
+        """check_hash_batch should accept pre-computed hashes and return hash-only results."""
+        hmac_key = "e" * 64
+        hash1 = hash_credential("user1@test.com", "pass1")
+        hash2 = hash_credential("user2@test.com", "pass2")
+
+        respx.get(f"{BASE_URL}credential-check/query").mock(
+            return_value=httpx.Response(
+                200,
+                json=[hmac_sha256(hash1, hmac_key)],
+                headers={
+                    "X-Prefix": hash1[:5],
+                    "X-HMAC-Key": hmac_key,
+                    "X-HMAC-Source": "server",
+                    "X-Total-Results": "1",
+                },
+            )
+        )
+
+        async with DarkStrataCredentialCheck(
+            api_key=API_KEY, base_url=BASE_URL, enable_caching=False
+        ) as client:
+            results = await client.check_hash_batch([hash1.lower(), hash2])
+
+            assert len(results) == 2
+            assert results[0].found is True
+            assert results[0].credential.email == "[hash-only]"
+            assert results[1].found is False
+
+            assert await client.check_hash_batch([]) == []
+            with pytest.raises(ValidationError):
+                await client.check_hash_batch([hash1, "G" * 64])
+
+    @pytest.mark.asyncio
     async def test_should_return_empty_array_for_empty_input(self) -> None:
         """Should return empty array for empty input."""
         async with DarkStrataCredentialCheck(api_key=API_KEY) as client:

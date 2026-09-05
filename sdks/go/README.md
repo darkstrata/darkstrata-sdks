@@ -99,6 +99,13 @@ credentials := []credentialcheck.Credential{
     {Email: "bob@example.com", Password: "bob456"},
 }
 results, err := client.CheckBatch(ctx, credentials, nil)
+
+// Or hash locally first and batch-check the hashes (results are in input order)
+hashes := make([]string, len(credentials))
+for i, c := range credentials {
+    hashes[i] = credentialcheck.HashCredential(c.Email, c.Password)
+}
+results, err = client.CheckHashBatch(ctx, hashes, nil)
 ```
 
 ### Check Options

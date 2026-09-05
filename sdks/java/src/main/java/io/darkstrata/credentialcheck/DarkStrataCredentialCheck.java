@@ -156,7 +156,7 @@ public class DarkStrataCredentialCheck implements Closeable {
             validateCredential(cred.getEmail(), cred.getPassword());
         }
 
-        // Hash all credentials and group by prefix
+        // Hash all credentials
         List<HashedCredential> hashedCredentials = new ArrayList<>();
         for (int i = 0; i < credentials.size(); i++) {
             Credential cred = credentials.get(i);
@@ -164,6 +164,45 @@ public class DarkStrataCredentialCheck implements Closeable {
             hashedCredentials.add(new HashedCredential(i, cred.getEmail(), hash));
         }
 
+        return checkHashedBatch(hashedCredentials, options);
+    }
+
+    /**
+     * Check multiple pre-computed hashes efficiently using batch processing.
+     *
+     * @param hashes list of SHA-256 hashes of {@code email:password} (64 hex characters each)
+     * @return list of check results in the same order as input, with {@code [hash-only]} as the email
+     * @throws DarkStrataException if any hash is invalid or an error occurs
+     */
+    public List<CheckResult> checkHashBatch(List<String> hashes) throws DarkStrataException {
+        return checkHashBatch(hashes, null);
+    }
+
+    /**
+     * Check multiple pre-computed hashes efficiently using batch processing.
+     *
+     * @param hashes list of SHA-256 hashes of {@code email:password} (64 hex characters each)
+     * @param options check options applied to all hashes
+     * @return list of check results in the same order as input, with {@code [hash-only]} as the email
+     * @throws DarkStrataException if any hash is invalid or an error occurs
+     */
+    public List<CheckResult> checkHashBatch(List<String> hashes, CheckOptions options) throws DarkStrataException {
+        if (hashes == null || hashes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<HashedCredential> hashedCredentials = new ArrayList<>();
+        for (int i = 0; i < hashes.size(); i++) {
+            validateHash(hashes.get(i));
+            String normalizedHash = hashes.get(i).toUpperCase(Locale.ROOT);
+            hashedCredentials.add(new HashedCredential(i, "[hash-only]", normalizedHash));
+        }
+
+        return checkHashedBatch(hashedCredentials, options);
+    }
+
+    private List<CheckResult> checkHashedBatch(List<HashedCredential> hashedCredentials, CheckOptions options)
+            throws DarkStrataException {
         Map<String, List<HashedCredential>> grouped = CryptoUtils.groupByPrefix(
                 hashedCredentials,
                 HashedCredential::getHash
@@ -195,7 +234,7 @@ public class DarkStrataCredentialCheck implements Closeable {
         }
 
         // Build results in original order
-        CheckResult[] results = new CheckResult[credentials.size()];
+        CheckResult[] results = new CheckResult[hashedCredentials.size()];
         for (HashedCredential hc : hashedCredentials) {
             String prefix = CryptoUtils.extractPrefix(hc.getHash());
             ApiResponse response = responses.get(prefix);

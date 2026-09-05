@@ -82,13 +82,37 @@ func (c *Client) CheckBatch(ctx context.Context, credentials []Credential, opts 
 		})
 	}
 
+	return c.checkHashedBatch(ctx, hashedCreds, opts)
+}
+
+// CheckHashBatch checks multiple precomputed SHA-256 hashes (of "email:password",
+// e.g. from HashCredential) efficiently by grouping by prefix. Results are
+// returned in input order with no email attached.
+func (c *Client) CheckHashBatch(ctx context.Context, hashes []string, opts *CheckOptions) ([]CheckResult, error) {
+	if len(hashes) == 0 {
+		return []CheckResult{}, nil
+	}
+
+	hashedCreds := make([]HashedCredential, 0, len(hashes))
+	for i, hash := range hashes {
+		hash = strings.ToUpper(hash)
+		if !IsValidHash(hash, 64) {
+			return nil, NewValidationError(fmt.Sprintf("hashes[%d]", i), "invalid SHA-256 hash format (expected 64 hex characters)")
+		}
+		hashedCreds = append(hashedCreds, HashedCredential{Hash: hash})
+	}
+
+	return c.checkHashedBatch(ctx, hashedCreds, opts)
+}
+
+func (c *Client) checkHashedBatch(ctx context.Context, hashedCreds []HashedCredential, opts *CheckOptions) ([]CheckResult, error) {
 	// Group by prefix for efficient batching
 	groups := GroupByPrefix(hashedCreds, func(hc HashedCredential) string {
 		return hc.Hash
 	})
 
 	// Process each prefix group
-	results := make([]CheckResult, len(credentials))
+	results := make([]CheckResult, len(hashedCreds))
 	resultIndex := make(map[string]int)
 	for i, hc := range hashedCreds {
 		resultIndex[hc.Hash] = i

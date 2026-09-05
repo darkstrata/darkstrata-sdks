@@ -10,7 +10,9 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example batch_check
 //! ```
 
-use darkstrata_credential_check::{ClientOptions, Credential, DarkStrataCredentialCheck};
+use darkstrata_credential_check::{
+    crypto_utils::hash_credential, ClientOptions, Credential, DarkStrataCredentialCheck,
+};
 use std::env;
 
 #[tokio::main]
@@ -35,9 +37,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Checking {} credentials in batch...\n", credentials.len());
 
-    // Perform batch check
+    // 1. Hash every credential locally. Only the hashes are handed to the client;
+    //    the plaintext emails and passwords never leave this process.
+    let hashes: Vec<String> = credentials
+        .iter()
+        .map(|c| hash_credential(&c.email, &c.password))
+        .collect();
+
+    // 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+    //    prefix, fetches each prefix once, and compares the full hashes locally.
+    //    results[i] corresponds to hashes[i] (and so to credentials[i]).
     let start = std::time::Instant::now();
-    let results = client.check_batch(&credentials, None).await?;
+    let results = client.check_hash_batch(&hashes, None).await?;
     let duration = start.elapsed();
 
     // Display results
