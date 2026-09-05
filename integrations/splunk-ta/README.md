@@ -130,9 +130,11 @@ The DarkStrata Threat Intelligence Add-on for Splunk enables security teams to:
 
 ### Option 1: Splunkbase (Recommended)
 
+The add-on is published on Splunkbase at [https://splunkbase.splunk.com/app/8955](https://splunkbase.splunk.com/app/8955).
+
 1. Log in to Splunk Web as an administrator
 2. Navigate to **Apps** > **Find More Apps**
-3. Search for "DarkStrata"
+3. Search for "DarkStrata" (or download the package from the [Splunkbase listing](https://splunkbase.splunk.com/app/8955))
 4. Click **Install**
 5. Enter your Splunk.com credentials if prompted
 6. Restart Splunk when prompted
