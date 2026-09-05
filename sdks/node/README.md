@@ -37,15 +37,21 @@ pnpm add @darkstrata/credential-check
 ## Quick Start
 
 ```typescript
-import { DarkStrataCredentialCheck } from '@darkstrata/credential-check';
+import { DarkStrataCredentialCheck, hashCredential } from '@darkstrata/credential-check';
 
 // Create a client
 const client = new DarkStrataCredentialCheck({
   apiKey: 'your-api-key',
 });
 
-// Check a single credential
-const result = await client.check('user@example.com', 'password123');
+// email and password come from your login form and are only ever used here.
+// 1. Hash the credential locally: SHA-256 of "email:password".
+//    The plaintext email and password never leave this process.
+const hash = hashCredential(email, password);
+
+// 2. Check the hash. The SDK sends only the first 5-6 characters (the
+//    k-anonymity prefix) to the API and compares the full hash locally.
+const result = await client.checkHash(hash);
 
 if (result.found) {
   console.log('⚠️ This credential was found in a data breach!');

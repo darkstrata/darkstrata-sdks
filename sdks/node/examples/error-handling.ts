@@ -16,9 +16,14 @@ import {
   NetworkError,
   RateLimitError,
   isDarkStrataError,
+  hashCredential,
 } from '../src/index.js';
 
 async function main() {
+  // Hash the credential once, locally. Only this hash is handed to the client,
+  // and only its 5-6 character prefix is ever sent to the API.
+  const hash = hashCredential('user@example.com', 'password');
+
   // Example 1: Handling validation errors
   console.log('Example 1: Validation Error');
   console.log('---');
@@ -27,7 +32,7 @@ async function main() {
     const client = new DarkStrataCredentialCheck({
       apiKey: '', // Empty API key - will throw ValidationError
     });
-    await client.check('user@example.com', 'password');
+    await client.checkHash(hash);
   } catch (error) {
     if (error instanceof ValidationError) {
       console.log(`Validation error on field "${error.field}": ${error.message}`);
@@ -44,7 +49,7 @@ async function main() {
     const client = new DarkStrataCredentialCheck({
       apiKey: 'invalid-api-key',
     });
-    await client.check('user@example.com', 'password');
+    await client.checkHash(hash);
   } catch (error) {
     if (error instanceof AuthenticationError) {
       console.log(`Authentication failed: ${error.message}`);
@@ -65,7 +70,7 @@ async function main() {
   });
 
   try {
-    const result = await client.check('user@example.com', 'password');
+    const result = await client.checkHash(hash);
     console.log(`Check completed. Found: ${result.found}`);
   } catch (error) {
     if (error instanceof AuthenticationError) {

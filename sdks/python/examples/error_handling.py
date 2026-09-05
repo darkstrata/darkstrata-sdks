@@ -18,18 +18,23 @@ from darkstrata_credential_check import (
     RateLimitError,
     TimeoutError,
     ValidationError,
+    hash_credential,
     is_darkstrata_error,
 )
 
 
 async def main() -> None:
+    # Hash the credential once, locally. Only this hash is handed to the client,
+    # and only its 5-6 character prefix is ever sent to the API.
+    hash_value = hash_credential("user@example.com", "password")
+
     # Example 1: Handling validation errors
     print("Example 1: Validation Error")
     print("---")
 
     try:
         client = DarkStrataCredentialCheck(api_key="")  # Empty API key - will throw ValidationError
-        await client.check("user@example.com", "password")
+        await client.check_hash(hash_value)
     except ValidationError as error:
         print(f'Validation error on field "{error.field}": {error}')
 
@@ -41,7 +46,7 @@ async def main() -> None:
 
     try:
         async with DarkStrataCredentialCheck(api_key="invalid-api-key") as client:
-            await client.check("user@example.com", "password")
+            await client.check_hash(hash_value)
     except AuthenticationError as error:
         print(f"Authentication failed: {error}")
         print("Please check your API key.")
@@ -60,7 +65,7 @@ async def main() -> None:
         retries=2,
     ) as client:
         try:
-            result = await client.check("user@example.com", "password")
+            result = await client.check_hash(hash_value)
             print(f"Check completed. Found: {result.found}")
         except AuthenticationError:
             # 401 - Invalid API key

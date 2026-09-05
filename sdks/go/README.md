@@ -31,8 +31,14 @@ func main() {
         log.Fatal(err)
     }
 
-    // Check a credential
-    result, err := client.Check(context.Background(), "user@example.com", "password123", nil)
+    // email and password come from your login form and are only ever used here.
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    hash := credentialcheck.HashCredential(email, password)
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    result, err := client.CheckHash(context.Background(), hash, nil)
     if err != nil {
         log.Fatal(err)
     }

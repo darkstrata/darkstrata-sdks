@@ -13,7 +13,11 @@ public class ErrorHandling {
                         .timeout(30000) // 30 second timeout
                         .build()
         )) {
-            CheckResult result = client.check("user@example.com", "password123");
+            // Hash the credential locally; only the hash is handed to the client,
+            // and only its 5-6 character prefix is ever sent to the API.
+            String hash = CryptoUtils.hashCredential("user@example.com", "password123");
+
+            CheckResult result = client.checkHash(hash);
             System.out.println("Found: " + result.isFound());
 
         } catch (ValidationException e) {

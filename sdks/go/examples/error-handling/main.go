@@ -34,8 +34,12 @@ func main() {
 
 	ctx := context.Background()
 
+	// Hash the credential once, locally. Only this hash is handed to the client,
+	// and only its 5-6 character prefix is ever sent to the API.
+	hash := credentialcheck.HashCredential("user@example.com", "password123")
+
 	// Example 2: Handle all error types
-	result, err := client.Check(ctx, "user@example.com", "password123", nil)
+	result, err := client.CheckHash(ctx, hash, nil)
 	if err != nil {
 		handleError(err)
 		return
@@ -47,7 +51,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
 
-	_, err = client.Check(ctx, "user@example.com", "password123", nil)
+	_, err = client.CheckHash(ctx, hash, nil)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			fmt.Println("Request timed out due to context deadline")

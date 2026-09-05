@@ -10,7 +10,9 @@
 //! DARKSTRATA_API_KEY=your-key cargo run --example error_handling
 //! ```
 
-use darkstrata_credential_check::{ClientOptions, DarkStrataCredentialCheck, DarkStrataError};
+use darkstrata_credential_check::{
+    crypto_utils::hash_credential, ClientOptions, DarkStrataCredentialCheck, DarkStrataError,
+};
 use std::env;
 use std::time::Duration;
 
@@ -18,12 +20,16 @@ use std::time::Duration;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("DarkStrata Credential Check - Error Handling Example\n");
 
+    // Hash the credential once, locally. Only this hash is handed to the client,
+    // and only its 5-6 character prefix is ever sent to the API.
+    let hash = hash_credential("test@example.com", "password");
+
     // Example 1: Invalid API key
     println!("1. Testing with invalid API key...");
     match DarkStrataCredentialCheck::new(ClientOptions::new("invalid-key")) {
         Ok(client) => {
             // Client creation succeeded, but API call will fail
-            match client.check("test@example.com", "password", None).await {
+            match client.check_hash(&hash, None).await {
                 Ok(_) => println!("   Unexpected success!"),
                 Err(e) => {
                     println!("   Error: {}", e);
@@ -76,7 +82,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Some(key) = api_key {
         let client = DarkStrataCredentialCheck::new(ClientOptions::new(key))?;
 
-        match client.check("test@example.com", "password", None).await {
+        match client.check_hash(&hash, None).await {
             Ok(result) => {
                 println!("   Success!");
                 println!("   Found: {}", result.found);

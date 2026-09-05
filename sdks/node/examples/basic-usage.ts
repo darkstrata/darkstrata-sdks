@@ -7,7 +7,7 @@
  * Run: npx tsx examples/basic-usage.ts
  */
 
-import { DarkStrataCredentialCheck } from '../src/index.js';
+import { DarkStrataCredentialCheck, hashCredential } from '../src/index.js';
 
 async function main() {
   // Create a client with your API key
@@ -22,7 +22,13 @@ async function main() {
   console.log(`Checking credential for: ${email}`);
   console.log('---');
 
-  const result = await client.check(email, password);
+  // 1. Hash the credential locally: SHA-256 of "email:password".
+  //    The plaintext email and password never leave this process.
+  const hash = hashCredential(email, password);
+
+  // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+  //    k-anonymity prefix) to the API and compares the full hash locally.
+  const result = await client.checkHash(hash);
 
   if (result.found) {
     console.log('⚠️  WARNING: This credential was found in a data breach!');

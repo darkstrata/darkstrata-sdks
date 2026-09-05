@@ -29,7 +29,13 @@ Console.WriteLine($"Checking credential: {email}");
 
 try
 {
-    var result = await client.CheckAsync(email, password);
+    // 1. Hash the credential locally: SHA-256 of "email:password".
+    //    The plaintext email and password never leave this process.
+    var hash = CryptoUtils.HashCredential(email, password);
+
+    // 2. Check the hash. The SDK sends only the first 5-6 characters (the
+    //    k-anonymity prefix) to the API and compares the full hash locally.
+    var result = await client.CheckHashAsync(hash);
 
     Console.WriteLine($"\nResult:");
     Console.WriteLine($"  Found: {result.Found}");
