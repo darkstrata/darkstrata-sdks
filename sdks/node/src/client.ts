@@ -224,12 +224,60 @@ export class DarkStrataCredentialCheck {
     }
     this.validateCheckOptions(options);
 
-    // Hash all credentials and group by prefix
+    // Hash all credentials
     const hashedCredentials = credentials.map((cred) => ({
-      ...cred,
+      email: cred.email,
       hash: hashCredential(cred.email, cred.password),
     }));
 
+    return this.checkHashedBatch(hashedCredentials, options);
+  }
+
+  /**
+   * Check multiple pre-computed hashes in a single batch.
+   *
+   * Use this method if you've already computed the SHA-256 hashes of the
+   * credentials (`email:password`), for example with {@link hashCredential}.
+   * Hashes are grouped by prefix to minimise API calls.
+   *
+   * @param hashes - Array of SHA-256 hashes (64 hex characters each)
+   * @param options - Optional check options applied to all hashes
+   * @returns A promise that resolves with an array of check results, in input order
+   * @throws {ValidationError} If any hash is invalid
+   *
+   * @example
+   * ```typescript
+   * const hashes = credentials.map((c) => hashCredential(c.email, c.password));
+   * const results = await client.checkHashBatch(hashes);
+   * ```
+   */
+  async checkHashBatch(
+    hashes: string[],
+    options?: CheckOptions
+  ): Promise<CheckResult[]> {
+    if (hashes.length === 0) {
+      return [];
+    }
+
+    const hashedCredentials = hashes.map((hash) => {
+      const normalisedHash = hash.toUpperCase();
+      if (!isValidHash(normalisedHash)) {
+        throw new ValidationError(
+          'Invalid hash format. Expected 64 hexadecimal characters.',
+          'hash'
+        );
+      }
+      return { email: undefined, hash: normalisedHash };
+    });
+    this.validateCheckOptions(options);
+
+    return this.checkHashedBatch(hashedCredentials, options);
+  }
+
+  private async checkHashedBatch(
+    hashedCredentials: { email: string | undefined; hash: string }[],
+    options?: CheckOptions
+  ): Promise<CheckResult[]> {
     const groupedByPrefix = groupByPrefix(hashedCredentials);
 
     // Fetch data for each unique prefix

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,6 +178,35 @@ class DarkStrataCredentialCheckTest {
 
         assertEquals(500, ex.getStatusCode());
         assertTrue(ex.isRetryable());
+    }
+
+    @Test
+    @DisplayName("checkHashBatch checks pre-computed hashes")
+    void checkHashBatchChecksPrecomputedHashes() throws Exception {
+        String hmacKey = "A".repeat(64);
+        String hash1 = CryptoUtils.hashCredential("user1@test.com", "pass1");
+        String hash2 = CryptoUtils.hashCredential("user2@test.com", "pass2");
+
+        for (int i = 0; i < 2; i++) {
+            mockServer.enqueue(new MockResponse()
+                    .setResponseCode(200)
+                    .setHeader("X-Prefix", "12345")
+                    .setHeader("X-HMAC-Key", hmacKey)
+                    .setHeader("X-HMAC-Source", "server")
+                    .setHeader("X-Total-Results", "1")
+                    .setBody("[\"" + CryptoUtils.hmacSha256(hash1, hmacKey) + "\"]"));
+        }
+
+        List<CheckResult> results = client.checkHashBatch(Arrays.asList(hash1.toLowerCase(), hash2));
+
+        assertEquals(2, results.size());
+        assertTrue(results.get(0).isFound());
+        assertEquals("[hash-only]", results.get(0).getCredential().getEmail());
+        assertFalse(results.get(1).isFound());
+
+        assertTrue(client.checkHashBatch(Collections.emptyList()).isEmpty());
+        assertThrows(ValidationException.class, () ->
+                client.checkHashBatch(Arrays.asList(hash1, "G".repeat(64))));
     }
 
     @Test

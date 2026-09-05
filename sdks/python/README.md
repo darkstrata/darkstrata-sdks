@@ -157,6 +157,17 @@ results = await client.check_batch([
 
 **Returns:** `list[CheckResult]`
 
+##### `check_hash_batch(hashes, options?)`
+
+Check multiple pre-computed hashes efficiently. Results are in input order with `credential.email` set to `[hash-only]`.
+
+```python
+hashes = [hash_credential(c.email, c.password) for c in credentials]
+results = await client.check_hash_batch(hashes)
+```
+
+**Returns:** `list[CheckResult]`
+
 ##### `clear_cache()`
 
 Clear the internal response cache.

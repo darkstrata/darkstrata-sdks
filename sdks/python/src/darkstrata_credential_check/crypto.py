@@ -180,7 +180,7 @@ def secure_wipe(_value: str) -> str:
 class HashedCredential:
     """A credential with its computed hash."""
 
-    def __init__(self, email: str, password: str, hash_value: str) -> None:
+    def __init__(self, email: str | None, password: str, hash_value: str) -> None:
         self.email = email
         self.password = password
         self.hash = hash_value

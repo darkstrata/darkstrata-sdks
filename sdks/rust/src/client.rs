@@ -152,8 +152,44 @@ impl DarkStrataCredentialCheck {
             hashed_credentials.push(prepare_credential(&cred.email, &cred.password)?);
         }
 
+        self.check_hashed_batch(&hashed_credentials, options).await
+    }
+
+    /// Check multiple pre-computed hashes in a single batch.
+    ///
+    /// Use this if you've already computed the SHA-256 hashes of the
+    /// credentials (`email:password`), for example with
+    /// [`crypto_utils::hash_credential`](crate::crypto_utils::hash_credential).
+    /// Hashes are grouped by prefix to minimise API calls. Results are returned
+    /// in input order with a masked credential.
+    ///
+    /// # Errors
+    ///
+    /// Returns a validation error if any hash is not 64 hex characters.
+    pub async fn check_hash_batch(
+        &self,
+        hashes: &[String],
+        options: Option<CheckOptions>,
+    ) -> Result<Vec<CheckResult>> {
+        if hashes.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let mut hashed_credentials = Vec::with_capacity(hashes.len());
+        for hash in hashes {
+            hashed_credentials.push(prepare_hash(hash)?);
+        }
+
+        self.check_hashed_batch(&hashed_credentials, options).await
+    }
+
+    async fn check_hashed_batch(
+        &self,
+        hashed_credentials: &[HashedCredential],
+        options: Option<CheckOptions>,
+    ) -> Result<Vec<CheckResult>> {
         // Group by prefix for efficient API calls
-        let groups = group_by_prefix(&hashed_credentials);
+        let groups = group_by_prefix(hashed_credentials);
 
         // Fetch data for each unique prefix
         let mut prefix_responses: HashMap<String, ApiResponse> = HashMap::new();
@@ -164,7 +200,7 @@ impl DarkStrataCredentialCheck {
 
         // Check each credential against its prefix response
         let mut results = Vec::with_capacity(hashed_credentials.len());
-        for hashed in &hashed_credentials {
+        for hashed in hashed_credentials {
             let response = prefix_responses
                 .get(&hashed.prefix)
                 .expect("Prefix response should exist");

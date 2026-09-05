@@ -156,6 +156,42 @@ async fn test_batch_check() {
 }
 
 #[tokio::test]
+async fn test_check_hash_batch() {
+    let mock_server = MockServer::start().await;
+
+    let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
+    Mock::given(method("GET"))
+        .and(path("/v1/credential-check/query"))
+        .respond_with(mock_response(
+            vec!["AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"],
+            hmac_key,
+        ))
+        .mount(&mock_server)
+        .await;
+
+    let client = DarkStrataCredentialCheck::new(
+        ClientOptions::new("test-api-key").base_url(format!("{}/v1/", mock_server.uri())),
+    )
+    .unwrap();
+
+    let hashes = vec![
+        crypto_utils::hash_credential("alice@example.com", "pass1").to_lowercase(),
+        crypto_utils::hash_credential("bob@example.com", "pass2"),
+    ];
+
+    let results = client.check_hash_batch(&hashes, None).await.unwrap();
+    assert_eq!(results.len(), 2);
+    assert!(results[0].credential.masked);
+
+    assert!(client.check_hash_batch(&[], None).await.unwrap().is_empty());
+    assert!(client
+        .check_hash_batch(&["not-a-hash".to_string()], None)
+        .await
+        .is_err());
+}
+
+#[tokio::test]
 async fn test_check_with_since_filter() {
     let mock_server = MockServer::start().await;
 

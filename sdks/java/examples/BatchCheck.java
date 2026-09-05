@@ -1,6 +1,7 @@
 import io.darkstrata.credentialcheck.*;
 import io.darkstrata.credentialcheck.exception.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,8 +24,17 @@ public class BatchCheck {
                     new Credential("test@example.com", "testpass")
             );
 
-            // Check all credentials in a single batch operation
-            List<CheckResult> results = client.checkBatch(credentials);
+            // 1. Hash every credential locally. Only the hashes are handed to the client;
+            //    the plaintext emails and passwords never leave this process.
+            List<String> hashes = new ArrayList<>();
+            for (Credential cred : credentials) {
+                hashes.add(CryptoUtils.hashCredential(cred.getEmail(), cred.getPassword()));
+            }
+
+            // 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+            //    prefix, fetches each prefix once, and compares the full hashes locally.
+            //    results.get(i) corresponds to hashes.get(i) (and so to credentials.get(i)).
+            List<CheckResult> results = client.checkHashBatch(hashes);
 
             // Process results
             int compromisedCount = 0;

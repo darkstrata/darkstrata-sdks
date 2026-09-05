@@ -30,8 +30,14 @@ try
 {
     var stopwatch = Stopwatch.StartNew();
 
-    // Check all credentials in batch
-    var results = await client.CheckBatchAsync(credentials);
+    // 1. Hash every credential locally. Only the hashes are handed to the client;
+    //    the plaintext emails and passwords never leave this process.
+    var hashes = credentials.Select(c => CryptoUtils.HashCredential(c.Email, c.Password)).ToList();
+
+    // 2. Check the hashes in one batch. The SDK groups them by 5-6 character
+    //    prefix, fetches each prefix once, and compares the full hashes locally.
+    //    results[i] corresponds to hashes[i] (and so to credentials[i]).
+    var results = await client.CheckHashBatchAsync(hashes);
 
     stopwatch.Stop();
 
@@ -39,12 +45,12 @@ try
     Console.WriteLine("--------");
 
     var compromisedCount = 0;
-    foreach (var result in results)
+    for (var i = 0; i < results.Count; i++)
     {
-        var status = result.Found ? "[COMPROMISED]" : "[OK]";
-        Console.WriteLine($"  {status} {result.Email}");
+        var status = results[i].Found ? "[COMPROMISED]" : "[OK]";
+        Console.WriteLine($"  {status} {credentials[i].Email}");
 
-        if (result.Found)
+        if (results[i].Found)
         {
             compromisedCount++;
         }

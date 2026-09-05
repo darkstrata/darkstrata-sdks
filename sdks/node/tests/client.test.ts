@@ -328,6 +328,42 @@ describe('DarkStrataCredentialCheck', () => {
       expect(results[0]!.credential.email).toBe('user1@test.com');
     });
 
+    it('should check pre-computed hashes with checkHashBatch', async () => {
+      const client = new DarkStrataCredentialCheck({
+        apiKey: API_KEY,
+        baseUrl: BASE_URL,
+        enableCaching: false,
+      });
+
+      const hmacKey = 'e'.repeat(64);
+      const hash1 = hashCredential('user1@test.com', 'pass1');
+      const hash2 = hashCredential('user2@test.com', 'pass2');
+
+      mockFetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        headers: new Headers({
+          'X-Prefix': hash1.substring(0, 5),
+          'X-HMAC-Key': hmacKey,
+          'X-HMAC-Source': 'server',
+          'X-Total-Results': '1',
+        }),
+        json: async () => [hmacSha256(hash1, hmacKey)],
+      });
+
+      const results = await client.checkHashBatch([hash1.toLowerCase(), hash2]);
+
+      expect(results).toHaveLength(2);
+      expect(results[0]!.found).toBe(true);
+      expect(results[0]!.credential.email).toBe('[hash-only]');
+      expect(results[1]!.found).toBe(false);
+
+      await expect(client.checkHashBatch([hash1, 'G'.repeat(64)])).rejects.toThrow(
+        ValidationError
+      );
+      expect(await client.checkHashBatch([])).toEqual([]);
+    });
+
     it('should return empty array for empty input', async () => {
       const client = new DarkStrataCredentialCheck({ apiKey: API_KEY });
 

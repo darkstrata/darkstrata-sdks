@@ -152,6 +152,17 @@ Task<IReadOnlyList<CheckResult>> CheckBatchAsync(
 
 Check multiple credentials efficiently with automatic prefix grouping.
 
+##### CheckHashBatchAsync
+
+```csharp
+Task<IReadOnlyList<CheckResult>> CheckHashBatchAsync(
+    IEnumerable<string> hashes,
+    CheckOptions? options = null,
+    CancellationToken cancellationToken = default)
+```
+
+Check multiple pre-computed hashes efficiently. Results are in input order with `Email` set to `[hash-only]`.
+
 ### CheckOptions
 
 | Property | Type | Description |
