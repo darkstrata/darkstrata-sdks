@@ -134,6 +134,25 @@ public class MyComposer : IComposer
 }
 ```
 
+## Pause or uninstall
+
+**Pause without uninstalling.** Remove or blank the API key. Every check is skipped, one
+warning is logged at startup, and logins and password changes behave as if the package were
+not installed. To switch off only part of it, set `CheckLogins` or `ValidatePasswords` to
+`false`. Setting `LoginAction` to `Warn` keeps the checks running but stops them blocking
+anyone, which is useful for a trial period.
+
+**Uninstall.**
+
+```bash
+dotnet remove package DarkStrata.CredentialCheck.Umbraco
+```
+
+Rebuild and redeploy. The package writes nothing to the Umbraco database and adds no content
+types, data types, tables or backoffice files, so there is nothing else to clean up. You can
+delete the `DarkStrata` section from your configuration; it is harmless if left behind. If you
+wrote a handler for `CompromisedCredentialDetectedNotification`, delete it too.
+
 ## Support
 
 - Issues: https://github.com/darkstrata/darkstrata-sdks/issues
