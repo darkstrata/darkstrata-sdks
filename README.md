@@ -25,8 +25,8 @@ Official SDKs and platform integrations for [DarkStrata](https://darkstrata.io) 
 
 This monorepo contains everything you need to integrate with DarkStrata:
 
-- **SDKs** — Client libraries for 6 languages to check credentials against the DarkStrata breach database using k-anonymity
-- **Integrations** — Pre-built platform integrations that bring DarkStrata threat intelligence into your existing security tooling
+- **SDKs** - Client libraries for 6 languages to check credentials against the DarkStrata breach database using k-anonymity
+- **Integrations** - Pre-built platform integrations that bring DarkStrata threat intelligence into your existing security tooling
 
 ---
 

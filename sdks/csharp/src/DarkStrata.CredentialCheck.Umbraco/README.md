@@ -9,6 +9,18 @@ are never sent to DarkStrata. That is the package's only interaction with the AP
 
 Supports Umbraco 13 LTS, 15 and 16. Server-side only, no backoffice UI.
 
+## About DarkStrata
+
+[DarkStrata](https://darkstrata.io) is a credential-intelligence service. We continuously
+collect and parse infostealer logs and breach data from the clear, deep and dark web,
+including Telegram channels, invite-only forums and paste sites, and match them against your
+domains, employees and customers. Alerts arrive while a stolen credential is still fresh and
+still revocable, and flow into the SIEM, SOAR and threat-intelligence tools you already run.
+
+This package brings one part of that to Umbraco: the Credential Check API, which tells you
+whether a specific email and password pair is known to be compromised, without the password
+ever leaving your server.
+
 ## What it does
 
 | Hook | Behaviour |
@@ -90,7 +102,7 @@ not in the CMS database.
 
 | Setting | Default | Meaning |
 |---|---|---|
-| `ApiKey` | — | Required. With no key every check is skipped and a warning is logged at startup. |
+| `ApiKey` | - | Required. With no key every check is skipped and a warning is logged at startup. |
 | `ValidatePasswords` | `true` | Reject compromised passwords when they are set or changed. |
 | `CheckLogins` | `true` | Check member and backoffice logins. |
 | `LoginAction` | `Deny` | `Deny` rejects the login like a wrong password (lockout rules apply). `Warn` allows it, logs a warning and publishes the notification. |
