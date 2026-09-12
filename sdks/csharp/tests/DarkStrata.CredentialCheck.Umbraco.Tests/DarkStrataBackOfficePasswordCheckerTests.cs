@@ -12,11 +12,11 @@ public class DarkStrataBackOfficePasswordCheckerTests
         BackOfficeIdentityUser.CreateNew(new GlobalSettings(), "admin", "admin@example.com", "en-GB");
 
     [Theory]
-    [InlineData(BackOfficeLoginAction.Deny, BackOfficeUserPasswordCheckerResult.InvalidCredentials)]
-    [InlineData(BackOfficeLoginAction.Warn, BackOfficeUserPasswordCheckerResult.FallbackToDefaultChecker)]
-    public async Task Compromised_login_follows_configured_action(BackOfficeLoginAction action, BackOfficeUserPasswordCheckerResult expected)
+    [InlineData(LoginAction.Deny, BackOfficeUserPasswordCheckerResult.InvalidCredentials)]
+    [InlineData(LoginAction.Warn, BackOfficeUserPasswordCheckerResult.FallbackToDefaultChecker)]
+    public async Task Compromised_login_follows_configured_action(LoginAction action, BackOfficeUserPasswordCheckerResult expected)
     {
-        var options = new DarkStrataOptions { ApiKey = TestSupport.ApiKey, BackOfficeLoginAction = action };
+        var options = new DarkStrataOptions { ApiKey = TestSupport.ApiKey, LoginAction = action };
         var checker = new DarkStrataBackOfficePasswordChecker(
             TestSupport.Service(TestSupport.Client(found: true).Object, options),
             TestSupport.Options(options));

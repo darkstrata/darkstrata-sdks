@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Core.Security;
+using Umbraco.Cms.Web.Common.Security;
 using Umbraco.Extensions;
 
 namespace DarkStrata.CredentialCheck.Umbraco;
@@ -32,5 +34,7 @@ public sealed class DarkStrataComposer : IComposer
         builder.Services.AddScoped<IPasswordValidator<MemberIdentityUser>, BreachedPasswordValidator<MemberIdentityUser>>();
         builder.Services.AddScoped<IPasswordValidator<BackOfficeIdentityUser>, BreachedPasswordValidator<BackOfficeIdentityUser>>();
         builder.Services.AddUnique<IBackOfficeUserPasswordChecker, DarkStrataBackOfficePasswordChecker>();
+        // Umbraco registers the sign-in manager as scoped; AddUnique would make it a singleton and fail container validation.
+        builder.Services.Replace(ServiceDescriptor.Scoped<IMemberSignInManager, DarkStrataMemberSignInManager>());
     }
 }

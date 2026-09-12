@@ -7,9 +7,6 @@ public sealed class DarkStrataOptions
 {
     public const string SectionName = "DarkStrata:CredentialCheck";
 
-    /// <summary>HTTP header carrying the shared secret on inbound DarkStrata webhooks.</summary>
-    public const string WebhookSecretHeader = "X-DarkStrata-Secret";
-
     /// <summary>ASP.NET Identity error code returned when a password is rejected.</summary>
     public const string IdentityErrorCode = "DarkStrataCompromised";
 
@@ -22,22 +19,19 @@ public sealed class DarkStrataOptions
     /// <summary>Reject compromised passwords when members or backoffice users set or change them.</summary>
     public bool ValidatePasswords { get; set; } = true;
 
-    /// <summary>Check backoffice logins against the breach corpus.</summary>
-    public bool CheckBackOfficeLogin { get; set; } = true;
+    /// <summary>Check member and backoffice logins against the breach corpus.</summary>
+    public bool CheckLogins { get; set; } = true;
 
-    /// <summary>What to do when a backoffice login uses a compromised password.</summary>
-    public BackOfficeLoginAction BackOfficeLoginAction { get; set; } = BackOfficeLoginAction.Deny;
-
-    /// <summary>Shared secret expected in <see cref="WebhookSecretHeader"/>. Webhook endpoint is disabled when empty.</summary>
-    public string? WebhookSecret { get; set; }
+    /// <summary>What to do when a login uses a compromised password.</summary>
+    public LoginAction LoginAction { get; set; } = LoginAction.Deny;
 
     /// <summary>When the DarkStrata API is unreachable, allow the operation (true) or reject it (false).</summary>
     public bool FailOpen { get; set; } = true;
 }
 
-public enum BackOfficeLoginAction
+public enum LoginAction
 {
-    /// <summary>Reject the login as invalid credentials.</summary>
+    /// <summary>Reject the login as invalid credentials, counting towards Umbraco's lockout threshold.</summary>
     Deny,
 
     /// <summary>Allow the login but log a warning and publish <see cref="CompromisedCredentialDetectedNotification"/>.</summary>

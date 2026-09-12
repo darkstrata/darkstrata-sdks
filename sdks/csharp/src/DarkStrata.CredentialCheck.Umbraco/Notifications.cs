@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Umbraco.Cms.Core.Notifications;
 
 namespace DarkStrata.CredentialCheck.Umbraco;
@@ -7,8 +6,8 @@ public enum CompromisedCredentialSource
 {
     MemberPassword,
     BackOfficePassword,
+    MemberLogin,
     BackOfficeLogin,
-    FormsWorkflow,
 }
 
 /// <summary>
@@ -30,22 +29,4 @@ public sealed class CompromisedCredentialDetectedNotification : INotification
 
     /// <summary>Identity user id (member or backoffice user) when known.</summary>
     public string? UserId { get; }
-}
-
-/// <summary>
-/// Published for every authenticated DarkStrata webhook delivery.
-/// </summary>
-public sealed class DarkStrataAlertReceivedNotification : INotification
-{
-    public DarkStrataAlertReceivedNotification(string eventKey, JsonElement payload)
-    {
-        EventKey = eventKey;
-        Payload = payload;
-    }
-
-    /// <summary>DarkStrata event key, e.g. <c>alert.stealer_log.created</c>.</summary>
-    public string EventKey { get; }
-
-    /// <summary>Full webhook body: <c>{ event, data, timestamp, webhook_id }</c>.</summary>
-    public JsonElement Payload { get; }
 }

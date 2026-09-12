@@ -21,14 +21,14 @@ public sealed class DarkStrataBackOfficePasswordChecker : IBackOfficeUserPasswor
     public async Task<BackOfficeUserPasswordCheckerResult> CheckPasswordAsync(BackOfficeIdentityUser user, string password)
     {
         var options = _options.CurrentValue;
-        if (!options.CheckBackOfficeLogin)
+        if (!options.CheckLogins)
         {
             return BackOfficeUserPasswordCheckerResult.FallbackToDefaultChecker;
         }
 
         var compromised = await _service.IsCompromisedAsync(CompromisedCredentialSource.BackOfficeLogin, user.Email, password, user.Id);
 
-        return compromised && options.BackOfficeLoginAction == BackOfficeLoginAction.Deny
+        return compromised && options.LoginAction == LoginAction.Deny
             ? BackOfficeUserPasswordCheckerResult.InvalidCredentials
             : BackOfficeUserPasswordCheckerResult.FallbackToDefaultChecker;
     }
