@@ -7,7 +7,7 @@ locally and checked against the DarkStrata breach corpus using
 only the first 5 characters of a SHA-256 hash ever leave your server. Passwords
 are never sent to DarkStrata. That is the package's only interaction with the API.
 
-Supports Umbraco 13 LTS, 15 and 16. Server-side only, no backoffice UI.
+Supports Umbraco 13 LTS, 15, 16 and 17 LTS. Server-side only, no backoffice UI.
 
 ## About DarkStrata
 

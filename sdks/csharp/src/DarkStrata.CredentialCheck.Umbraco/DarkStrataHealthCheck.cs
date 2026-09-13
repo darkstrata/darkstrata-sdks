@@ -25,7 +25,20 @@ public sealed class DarkStrataHealthCheck : HealthCheck
         _options = options;
     }
 
-    public override async Task<IEnumerable<HealthCheckStatus>> GetStatus()
+#if NET10_0_OR_GREATER
+    // Umbraco 17 removed the synchronous-named overrides.
+    public override Task<IEnumerable<HealthCheckStatus>> GetStatusAsync() => CheckAsync();
+
+    public override Task<HealthCheckStatus> ExecuteActionAsync(HealthCheckAction action) =>
+        throw new InvalidOperationException("This health check has no actions.");
+#else
+    public override Task<IEnumerable<HealthCheckStatus>> GetStatus() => CheckAsync();
+
+    public override HealthCheckStatus ExecuteAction(HealthCheckAction action) =>
+        throw new InvalidOperationException("This health check has no actions.");
+#endif
+
+    private async Task<IEnumerable<HealthCheckStatus>> CheckAsync()
     {
         if (string.IsNullOrWhiteSpace(_options.CurrentValue.ApiKey))
         {
@@ -42,7 +55,4 @@ public sealed class DarkStrataHealthCheck : HealthCheck
             return [new HealthCheckStatus($"DarkStrata API check failed: {ex.Message}") { ResultType = StatusResultType.Error }];
         }
     }
-
-    public override HealthCheckStatus ExecuteAction(HealthCheckAction action) =>
-        throw new InvalidOperationException("This health check has no actions.");
 }

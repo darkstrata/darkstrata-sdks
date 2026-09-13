@@ -287,7 +287,7 @@ Block compromised passwords for Umbraco members and backoffice users, check back
 | | |
 |---|---|
 | **NuGet** | [DarkStrata.CredentialCheck.Umbraco](https://www.nuget.org/packages/DarkStrata.CredentialCheck.Umbraco) |
-| **Compatibility** | Umbraco 13 LTS (.NET 8), Umbraco 15 and 16 (.NET 9) |
+| **Compatibility** | Umbraco 13 LTS (.NET 8), Umbraco 15 and 16 (.NET 9), Umbraco 17 LTS (.NET 10) |
 | **Documentation** | [Umbraco package guide](./sdks/csharp/src/DarkStrata.CredentialCheck.Umbraco/README.md) |
 
 ```bash
