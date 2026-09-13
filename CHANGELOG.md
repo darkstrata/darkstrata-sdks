@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/darkstrata/darkstrata-sdks/compare/v2.4.0...v2.4.1) (2026-09-13)
+
+
+### Bug Fixes
+
+* **csharp:** drop the removed webhook receiver from the Umbraco package description ([#17](https://github.com/darkstrata/darkstrata-sdks/issues/17)) ([9779261](https://github.com/darkstrata/darkstrata-sdks/commit/97792613b68a1a3a2ec9b991695feda71d1c2430))
+
 # [2.4.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.3.0...v2.4.0) (2026-09-12)
 
 
