@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.4.1...v2.5.0) (2026-09-13)
+
+
+### Features
+
+* **csharp:** support Umbraco 17 LTS in the Umbraco package ([#18](https://github.com/darkstrata/darkstrata-sdks/issues/18)) ([935c0ec](https://github.com/darkstrata/darkstrata-sdks/commit/935c0ec412358f5dd7a4f8dee5d9e14187c31754))
+
 ## [2.4.1](https://github.com/darkstrata/darkstrata-sdks/compare/v2.4.0...v2.4.1) (2026-09-13)
 
 
