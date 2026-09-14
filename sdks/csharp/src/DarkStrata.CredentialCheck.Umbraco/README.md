@@ -26,7 +26,7 @@ ever leaving your server.
 | Hook | Behaviour |
 |---|---|
 | Password set / change / reset (members and backoffice users) | Rejected with identity error code `DarkStrataCompromised` when the email + password pair is in the breach corpus. |
-| Member and backoffice login | Compromised pair is denied as a wrong password, counting towards Umbraco's lockout threshold (default), or allowed with a warning. |
+| Member and backoffice login | Compromised pair is denied as a wrong password, counting towards Umbraco's lockout threshold (default), or allowed with a warning. A denied member login returns `CompromisedCredentialSignInResult` so you can say why. |
 | Any hit | Publishes `CompromisedCredentialDetectedNotification` so you can run your own workflow. |
 | Health check | Settings → Health Check → Security shows API key and connectivity status. |
 
@@ -133,6 +133,49 @@ public class MyComposer : IComposer
         builder.AddNotificationAsyncHandler<CompromisedCredentialDetectedNotification, CompromisedCredentialHandler>();
 }
 ```
+
+## Tell the person what happened
+
+The checks correlate an email address **and** a password, so the accurate message is that the
+*pair* is breached, not that the password is weak. Someone hitting this needs to change that
+password everywhere they have reused it, so point them at password reset rather than just
+refusing them.
+
+**Password set or change.** The rejection is a normal `IdentityError` with code
+`DarkStrataCompromised` (`DarkStrataOptions.IdentityErrorCode`), so substitute your own wording,
+localised or not, wherever you render identity errors:
+
+```csharp
+foreach (var error in result.Errors)
+{
+    ModelState.AddModelError("", error.Code == DarkStrataOptions.IdentityErrorCode
+        ? Localise("breachedCredentialPair")
+        : error.Description);
+}
+```
+
+**Member login.** Umbraco's built-in `UmbLoginController` always renders "Invalid username or
+password" and gives you no way in, so use your own surface controller and check the result type:
+
+```csharp
+var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, true);
+
+if (result is CompromisedCredentialSignInResult)
+{
+    ModelState.AddModelError("loginModel",
+        "This email address and password have appeared together in a data breach. "
+        + "Reset your password to sign in, and change it anywhere else you have used it.");
+    return CurrentUmbracoPage();
+}
+```
+
+`CompromisedCredentialSignInResult` is an ordinary failed `SignInResult`, so anything that only
+looks at `Succeeded`, `IsLockedOut`, `IsNotAllowed` or `RequiresTwoFactor` keeps behaving exactly
+as before. It only appears when `LoginAction` is `Deny`; `Warn` lets the login through.
+
+**Backoffice login.** There is no equivalent hook. `IBackOfficeUserPasswordChecker` returns an
+enum and the backoffice login screen's wording is fixed, so a denied backoffice login looks like
+a wrong password. Use `CompromisedCredentialDetectedNotification` to alert someone out of band.
 
 ## Pause or uninstall
 

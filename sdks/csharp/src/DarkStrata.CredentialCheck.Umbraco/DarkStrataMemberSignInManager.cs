@@ -52,7 +52,7 @@ public sealed class DarkStrataMemberSignInManager : MemberSignInManager
                 await UserManager.AccessFailedAsync(user);
             }
 
-            return SignInResult.Failed;
+            return CompromisedCredentialSignInResult.Instance;
         }
 
         return await base.CheckPasswordSignInAsync(user, password, lockoutOnFailure);
