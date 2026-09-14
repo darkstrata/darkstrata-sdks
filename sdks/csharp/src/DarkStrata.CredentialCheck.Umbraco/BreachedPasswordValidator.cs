@@ -36,7 +36,7 @@ public sealed class BreachedPasswordValidator<TUser> : IPasswordValidator<TUser>
             ? IdentityResult.Failed(new IdentityError
             {
                 Code = DarkStrataOptions.IdentityErrorCode,
-                Description = "This password has appeared in a data breach. Please choose a different password.",
+                Description = "This email address and password have appeared together in a data breach. Choose a different password.",
             })
             : IdentityResult.Success;
     }

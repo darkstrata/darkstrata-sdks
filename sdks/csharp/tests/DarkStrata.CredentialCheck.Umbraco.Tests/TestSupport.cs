@@ -2,6 +2,7 @@ using DarkStrata.CredentialCheck.Umbraco;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
+using Umbraco.Cms.Core.Cache;
 using Umbraco.Cms.Core.Events;
 
 namespace DarkStrata.CredentialCheck.Umbraco.Tests;
@@ -38,6 +39,15 @@ internal static class TestSupport
         return monitor.Object;
     }
 
-    public static CompromisedCredentialService Service(IDarkStrataCredentialCheck client, DarkStrataOptions options, IEventAggregator? events = null) =>
-        new(client, events ?? Mock.Of<IEventAggregator>(), Options(options), NullLogger<CompromisedCredentialService>.Instance);
+    public static CompromisedCredentialService Service(
+        IDarkStrataCredentialCheck client,
+        DarkStrataOptions options,
+        IEventAggregator? events = null,
+        IRequestCache? requestCache = null) =>
+        new(
+            client,
+            events ?? Mock.Of<IEventAggregator>(),
+            Options(options),
+            NullLogger<CompromisedCredentialService>.Instance,
+            requestCache ?? new DictionaryAppCache());
 }
