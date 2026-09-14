@@ -1,3 +1,10 @@
+## [2.5.1](https://github.com/darkstrata/darkstrata-sdks/compare/v2.5.0...v2.5.1) (2026-09-14)
+
+
+### Bug Fixes
+
+* **csharp:** one API call per Umbraco login, and say what was actually found ([#20](https://github.com/darkstrata/darkstrata-sdks/issues/20)) ([2d88249](https://github.com/darkstrata/darkstrata-sdks/commit/2d882490fa835bf34c63e9a1944bd62bea837c1a))
+
 # [2.5.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.4.1...v2.5.0) (2026-09-13)
 
 
