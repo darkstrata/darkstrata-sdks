@@ -40,7 +40,7 @@ final class LaravelTest extends TestCase
             public function retrieveById($identifier) { return null; }
             public function retrieveByToken($identifier, $token) { return null; }
             public function updateRememberToken(Authenticatable $user, $token) {}
-            public function retrieveByCredentials(array $credentials) { return new GenericUser(['id' => 42, 'email' => $credentials['email']]); }
+            public function retrieveByCredentials(array $credentials) { return new GenericUser(['id' => 42, 'email' => $credentials['email'], 'password' => 'hashed', 'remember_token' => null]); }
             public function validateCredentials(Authenticatable $user, array $credentials) { return $credentials['password'] === 'password123'; }
             public function rehashPasswordIfRequired(Authenticatable $user, array $credentials, bool $force = false) {}
         });
