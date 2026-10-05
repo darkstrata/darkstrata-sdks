@@ -135,10 +135,13 @@ ClientOptions options = ClientOptions.builder("your-api-key")
     .retries(5)                                  // Retry attempts
     .enableCaching(true)                         // Enable response caching
     .cacheTTL(3600000)                           // Cache TTL (ms)
+    .prefixLength(5)                             // Hash prefix length: 5 (default) or 6
     .build();
 
 DarkStrataCredentialCheck client = new DarkStrataCredentialCheck(options);
 ```
+
+`prefixLength` sets the hash characters sent to the API. 6 is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000.
 
 ### Check Options
 

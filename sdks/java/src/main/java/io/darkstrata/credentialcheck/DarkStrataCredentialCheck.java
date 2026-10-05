@@ -88,7 +88,7 @@ public class DarkStrataCredentialCheck implements Closeable {
         validateCredential(email, password);
 
         String hash = CryptoUtils.hashCredential(email, password);
-        String prefix = CryptoUtils.extractPrefix(hash);
+        String prefix = CryptoUtils.extractPrefix(hash, config.getPrefixLength());
 
         ApiResponse response = fetchWithRetry(prefix, options);
         boolean found = CryptoUtils.isHashInSet(hash, response.getHeaders().getHmacKey(), response.getHashes());
@@ -119,7 +119,7 @@ public class DarkStrataCredentialCheck implements Closeable {
         validateHash(hash);
 
         String normalizedHash = hash.toUpperCase(Locale.ROOT);
-        String prefix = CryptoUtils.extractPrefix(normalizedHash);
+        String prefix = CryptoUtils.extractPrefix(normalizedHash, config.getPrefixLength());
 
         ApiResponse response = fetchWithRetry(prefix, options);
         boolean found = CryptoUtils.isHashInSet(normalizedHash, response.getHeaders().getHmacKey(), response.getHashes());
@@ -205,7 +205,8 @@ public class DarkStrataCredentialCheck implements Closeable {
             throws DarkStrataException {
         Map<String, List<HashedCredential>> grouped = CryptoUtils.groupByPrefix(
                 hashedCredentials,
-                HashedCredential::getHash
+                HashedCredential::getHash,
+                config.getPrefixLength()
         );
 
         // Fetch all prefixes in parallel
@@ -236,7 +237,7 @@ public class DarkStrataCredentialCheck implements Closeable {
         // Build results in original order
         CheckResult[] results = new CheckResult[hashedCredentials.size()];
         for (HashedCredential hc : hashedCredentials) {
-            String prefix = CryptoUtils.extractPrefix(hc.getHash());
+            String prefix = CryptoUtils.extractPrefix(hc.getHash(), config.getPrefixLength());
             ApiResponse response = responses.get(prefix);
             boolean found = CryptoUtils.isHashInSet(hc.getHash(), response.getHeaders().getHmacKey(), response.getHashes());
             results[hc.getIndex()] = buildResult(found, hc.getEmail(), prefix, response, false);
@@ -315,6 +316,12 @@ public class DarkStrataCredentialCheck implements Closeable {
         }
         if (options.getCacheTTL() <= 0) {
             throw new ValidationException("Cache TTL must be positive", "cacheTTL");
+        }
+        if (options.getPrefixLength() < Constants.MIN_PREFIX_LENGTH
+                || options.getPrefixLength() > Constants.MAX_PREFIX_LENGTH) {
+            throw new ValidationException(
+                    "Prefix length must be " + Constants.MIN_PREFIX_LENGTH + " or " + Constants.MAX_PREFIX_LENGTH,
+                    "prefixLength");
         }
     }
 

@@ -161,10 +161,22 @@ public final class CryptoUtils {
      * @return map of prefix to list of credentials
      */
     public static <T> Map<String, List<T>> groupByPrefix(List<T> credentials, java.util.function.Function<T, String> hashExtractor) {
+        return groupByPrefix(credentials, hashExtractor, Constants.PREFIX_LENGTH);
+    }
+
+    /**
+     * Group credentials by their hash prefix of the given length.
+     *
+     * @param credentials   list of credentials with computed hashes
+     * @param hashExtractor function returning each credential's hash
+     * @param prefixLength  number of hash characters in each prefix (5 or 6)
+     * @return map of prefix to list of credentials
+     */
+    public static <T> Map<String, List<T>> groupByPrefix(List<T> credentials, java.util.function.Function<T, String> hashExtractor, int prefixLength) {
         Map<String, List<T>> groups = new HashMap<>();
         for (T credential : credentials) {
             String hash = hashExtractor.apply(credential);
-            String prefix = extractPrefix(hash);
+            String prefix = extractPrefix(hash, prefixLength);
             groups.computeIfAbsent(prefix, k -> new ArrayList<>()).add(credential);
         }
         return groups;

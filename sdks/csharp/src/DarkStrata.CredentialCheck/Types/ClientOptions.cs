@@ -13,7 +13,7 @@ public sealed class ClientOptions
     }
 
     [SetsRequiredMembers]
-    public ClientOptions(string apiKey, string? baseUrl = null, TimeSpan? timeout = null, int? retries = null, bool? enableCaching = null, TimeSpan? cacheTtl = null)
+    public ClientOptions(string apiKey, string? baseUrl = null, TimeSpan? timeout = null, int? retries = null, bool? enableCaching = null, TimeSpan? cacheTtl = null, int? prefixLength = null)
     {
         ApiKey = apiKey;
         BaseUrl = baseUrl;
@@ -21,6 +21,7 @@ public sealed class ClientOptions
         Retries = retries;
         EnableCaching = enableCaching;
         CacheTtl = cacheTtl;
+        PrefixLength = prefixLength;
     }
 
     /// <summary>
@@ -60,4 +61,12 @@ public sealed class ClientOptions
     /// </summary>
     /// <remarks>Default: 1 hour</remarks>
     public TimeSpan? CacheTtl { get; init; }
+
+    /// <summary>
+    /// Number of hash characters sent to the API (5 or 6).
+    /// 5 hides each check among ~8,000 hashes; 6 among ~500, with a ~16x smaller
+    /// response and roughly half the latency.
+    /// </summary>
+    /// <remarks>Default: 5</remarks>
+    public int? PrefixLength { get; init; }
 }

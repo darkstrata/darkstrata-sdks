@@ -39,6 +39,14 @@ export interface ClientOptions {
    * @default 3600000
    */
   cacheTTL?: number;
+
+  /**
+   * Number of hash characters sent to the API (5 or 6).
+   * 5 hides each check among ~8,000 hashes; 6 among ~500, with a ~16x smaller
+   * response and roughly half the latency.
+   * @default 5
+   */
+  prefixLength?: 5 | 6;
 }
 
 /**
@@ -291,4 +299,5 @@ export interface ResolvedConfig {
   retries: number;
   enableCaching: boolean;
   cacheTTL: number;
+  prefixLength: number;
 }

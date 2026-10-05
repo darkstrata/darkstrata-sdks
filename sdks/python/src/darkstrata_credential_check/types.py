@@ -11,6 +11,7 @@ from .constants import (
     DEFAULT_CACHE_TTL,
     DEFAULT_RETRIES,
     DEFAULT_TIMEOUT,
+    PREFIX_LENGTH,
 )
 
 
@@ -34,6 +35,10 @@ class ClientOptions:
         cache_ttl: Cache time-to-live in seconds.
             Should align with server time window (1 hour).
             Defaults to 3600.
+        prefix_length: Number of hash characters sent to the API (5 or 6).
+            5 hides each check among ~8,000 hashes; 6 among ~500, with a ~16x
+            smaller response and roughly half the latency.
+            Defaults to 5.
     """
 
     api_key: str
@@ -42,6 +47,7 @@ class ClientOptions:
     retries: int = DEFAULT_RETRIES
     enable_caching: bool = True
     cache_ttl: int = DEFAULT_CACHE_TTL
+    prefix_length: int = PREFIX_LENGTH
 
 
 @dataclass
@@ -233,3 +239,4 @@ class ResolvedConfig:
     retries: int
     enable_caching: bool
     cache_ttl: int
+    prefix_length: int

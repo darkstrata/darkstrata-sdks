@@ -110,6 +110,7 @@ new DarkStrataCredentialCheck(options: ClientOptions)
 | `retries` | `number` | `3` | Number of retry attempts |
 | `enableCaching` | `boolean` | `true` | Enable response caching |
 | `cacheTTL` | `number` | `3600000` | Cache TTL in milliseconds (1 hour) |
+| `prefixLength` | `5 \| 6` | `5` | Hash characters sent to the API. `6` is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000 |
 
 #### Methods
 

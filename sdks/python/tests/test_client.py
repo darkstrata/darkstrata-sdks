@@ -55,6 +55,47 @@ class TestConstructor:
         with pytest.raises(ValidationError):
             DarkStrataCredentialCheck(api_key=API_KEY, cache_ttl=0)
 
+    def test_should_raise_validation_error_for_invalid_prefix_length(self) -> None:
+        """Should raise ValidationError for prefix_length outside 5-6 or non-integer."""
+        for prefix_length in (4, 7, 5.5):
+            with pytest.raises(ValidationError, match="Prefix length must be 5 or 6"):
+                DarkStrataCredentialCheck(api_key=API_KEY, prefix_length=prefix_length)  # type: ignore[arg-type]
+
+    @respx.mock
+    @pytest.mark.asyncio
+    async def test_should_send_6_character_prefix_when_prefix_length_is_6(self) -> None:
+        """Should send a 6-character prefix when prefix_length is 6."""
+        email = "test@example.com"
+        password = "password123"
+        credential_hash = hash_credential(email, password)
+        hmac_key = "a" * 64
+
+        route = respx.get(f"{BASE_URL}credential-check/query").mock(
+            return_value=httpx.Response(
+                200,
+                json=[hmac_sha256(credential_hash, hmac_key)],
+                headers={
+                    "X-Prefix": credential_hash[:6],
+                    "X-HMAC-Key": hmac_key,
+                    "X-HMAC-Source": "server",
+                    "X-Time-Window": "12345",
+                    "X-Total-Results": "1",
+                },
+            )
+        )
+
+        async with DarkStrataCredentialCheck(
+            api_key=API_KEY,
+            base_url=BASE_URL,
+            enable_caching=False,
+            prefix_length=6,
+        ) as client:
+            result = await client.check(email, password)
+
+        assert route.calls.last.request.url.params["prefix"] == credential_hash[:6].upper()
+        assert result.found is True
+        assert result.metadata.prefix == credential_hash[:6].upper()
+
     def test_should_accept_custom_base_url(self) -> None:
         """Should accept custom baseUrl."""
         client = DarkStrataCredentialCheck(

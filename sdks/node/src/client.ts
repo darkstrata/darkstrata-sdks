@@ -5,6 +5,9 @@ import {
   DEFAULT_CACHE_TTL,
   DEFAULT_RETRIES,
   DEFAULT_TIMEOUT,
+  MAX_PREFIX_LENGTH,
+  MIN_PREFIX_LENGTH,
+  PREFIX_LENGTH,
   RESPONSE_HEADERS,
   RETRYABLE_STATUS_CODES,
   RETRY_DEFAULTS,
@@ -96,6 +99,7 @@ export class DarkStrataCredentialCheck {
       retries: options.retries ?? DEFAULT_RETRIES,
       enableCaching: options.enableCaching ?? true,
       cacheTTL: options.cacheTTL ?? DEFAULT_CACHE_TTL,
+      prefixLength: options.prefixLength ?? PREFIX_LENGTH,
     };
 
     this.cache = new Map();
@@ -278,7 +282,7 @@ export class DarkStrataCredentialCheck {
     hashedCredentials: { email: string | undefined; hash: string }[],
     options?: CheckOptions
   ): Promise<CheckResult[]> {
-    const groupedByPrefix = groupByPrefix(hashedCredentials);
+    const groupedByPrefix = groupByPrefix(hashedCredentials, this.config.prefixLength);
 
     // Fetch data for each unique prefix
     const prefixResponses = new Map<string, ApiResponse>();
@@ -298,7 +302,7 @@ export class DarkStrataCredentialCheck {
     const results: CheckResult[] = [];
 
     for (const credential of hashedCredentials) {
-      const prefix = extractPrefix(credential.hash);
+      const prefix = extractPrefix(credential.hash, this.config.prefixLength);
       const response = prefixResponses.get(prefix);
 
       if (!response) {
@@ -371,7 +375,7 @@ export class DarkStrataCredentialCheck {
     email?: string,
     options?: CheckOptions
   ): Promise<CheckResult> {
-    const prefix = extractPrefix(hash);
+    const prefix = extractPrefix(hash, this.config.prefixLength);
     const response = await this.fetchPrefixData(prefix, options);
 
     const found = isHashInSet(hash, response.headers.hmacKey, response.hashes);
@@ -669,6 +673,18 @@ export class DarkStrataCredentialCheck {
       throw new ValidationError(
         'Cache TTL must be a positive number',
         'cacheTTL'
+      );
+    }
+
+    if (
+      options.prefixLength !== undefined &&
+      (!Number.isInteger(options.prefixLength) ||
+        options.prefixLength < MIN_PREFIX_LENGTH ||
+        options.prefixLength > MAX_PREFIX_LENGTH)
+    ) {
+      throw new ValidationError(
+        `Prefix length must be ${MIN_PREFIX_LENGTH} or ${MAX_PREFIX_LENGTH}`,
+        'prefixLength'
       );
     }
   }

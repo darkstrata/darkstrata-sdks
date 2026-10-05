@@ -186,12 +186,15 @@ class HashedCredential:
         self.hash = hash_value
 
 
-def group_by_prefix(credentials: list[HashedCredential]) -> dict[str, list[HashedCredential]]:
+def group_by_prefix(
+    credentials: list[HashedCredential], prefix_length: int = PREFIX_LENGTH
+) -> dict[str, list[HashedCredential]]:
     """
     Group credentials by their hash prefix for efficient batch processing.
 
     Args:
         credentials: List of credential objects with hash property.
+        prefix_length: Number of hash characters per prefix (5 or 6). Defaults to 5.
 
     Returns:
         Dictionary mapping prefix to list of credentials.
@@ -199,7 +202,7 @@ def group_by_prefix(credentials: list[HashedCredential]) -> dict[str, list[Hashe
     groups: dict[str, list[HashedCredential]] = {}
 
     for credential in credentials:
-        prefix = extract_prefix(credential.hash)
+        prefix = extract_prefix(credential.hash, prefix_length)
         if prefix in groups:
             groups[prefix].append(credential)
         else:

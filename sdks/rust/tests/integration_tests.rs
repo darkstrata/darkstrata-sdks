@@ -65,6 +65,51 @@ async fn test_check_credential_found() {
 }
 
 #[tokio::test]
+async fn test_check_with_prefix_length_6() {
+    let mock_server = MockServer::start().await;
+
+    let email = "test@example.com";
+    let password = "password123";
+    let credential_hash = crypto_utils::hash_credential(email, password);
+    let prefix = credential_hash[..6].to_uppercase();
+    let hmac_key = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+    let expected_hmac = crypto_utils::hmac_sha256(&credential_hash, hmac_key).unwrap();
+
+    Mock::given(method("GET"))
+        .and(path("/v1/credential-check/query"))
+        .and(query_param("prefix", prefix.as_str()))
+        .respond_with(
+            mock_response(vec![&expected_hmac], hmac_key)
+                .insert_header("x-prefix", prefix.as_str()),
+        )
+        .expect(1)
+        .mount(&mock_server)
+        .await;
+
+    let client = DarkStrataCredentialCheck::new(
+        ClientOptions::new("test-api-key")
+            .base_url(format!("{}/v1/", mock_server.uri()))
+            .prefix_length(6),
+    )
+    .unwrap();
+
+    let result = client.check(email, password, None).await.unwrap();
+
+    assert!(result.found);
+    assert_eq!(result.metadata.prefix, prefix);
+}
+
+#[test]
+fn test_invalid_prefix_length() {
+    for length in [4, 7] {
+        let result = DarkStrataCredentialCheck::new(
+            ClientOptions::new("test-api-key").prefix_length(length),
+        );
+        assert!(matches!(result, Err(DarkStrataError::Validation { .. })));
+    }
+}
+
+#[tokio::test]
 async fn test_check_credential_not_found() {
     let mock_server = MockServer::start().await;
 

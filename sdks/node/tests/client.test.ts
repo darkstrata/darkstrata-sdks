@@ -64,6 +64,45 @@ describe('DarkStrataCredentialCheck', () => {
       }).toThrow(ValidationError);
     });
 
+    it('should throw ValidationError for invalid prefixLength', () => {
+      for (const prefixLength of [4, 7, 5.5]) {
+        expect(() => {
+          new DarkStrataCredentialCheck({ apiKey: API_KEY, prefixLength: prefixLength as 5 });
+        }).toThrow(ValidationError);
+      }
+    });
+
+    it('should send a 6-character prefix when prefixLength is 6', async () => {
+      const client = new DarkStrataCredentialCheck({
+        apiKey: API_KEY,
+        baseUrl: BASE_URL,
+        enableCaching: false,
+        prefixLength: 6,
+      });
+      const credentialHash = hashCredential('test@example.com', 'password123');
+      const hmacKey = 'a'.repeat(64);
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({
+          'X-Prefix': credentialHash.substring(0, 6),
+          'X-HMAC-Key': hmacKey,
+          'X-HMAC-Source': 'server',
+          'X-Time-Window': '12345',
+          'X-Total-Results': '1',
+        }),
+        json: async () => [hmacSha256(credentialHash, hmacKey)],
+      });
+
+      const result = await client.check('test@example.com', 'password123');
+
+      const url = new URL(mockFetch.mock.calls[0][0] as string);
+      expect(url.searchParams.get('prefix')).toBe(credentialHash.substring(0, 6).toUpperCase());
+      expect(result.found).toBe(true);
+      expect(result.metadata.prefix).toBe(credentialHash.substring(0, 6).toUpperCase());
+    });
+
     it('should accept custom baseUrl', () => {
       const client = new DarkStrataCredentialCheck({
         apiKey: API_KEY,
