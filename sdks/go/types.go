@@ -23,6 +23,11 @@ type ClientOptions struct {
 
 	// CacheTTL is the cache time-to-live (default: 1 hour)
 	CacheTTL time.Duration
+
+	// PrefixLength is the number of hash characters sent to the API, 5 or 6
+	// (default: 5; zero means default). 6 is ~2x faster with a ~16x smaller
+	// response, but hides each check among ~500 hashes instead of ~8,000.
+	PrefixLength int
 }
 
 // Credential represents a single email/password pair
@@ -113,6 +118,7 @@ type resolvedConfig struct {
 	retries       int
 	enableCaching bool
 	cacheTTL      time.Duration
+	prefixLength  int
 }
 
 // HashedCredential represents a credential with its precomputed hash

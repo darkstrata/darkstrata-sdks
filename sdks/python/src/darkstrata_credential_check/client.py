@@ -19,6 +19,9 @@ from .constants import (
     DEFAULT_CACHE_TTL,
     DEFAULT_RETRIES,
     DEFAULT_TIMEOUT,
+    MAX_PREFIX_LENGTH,
+    MIN_PREFIX_LENGTH,
+    PREFIX_LENGTH,
     RETRYABLE_STATUS_CODES,
     SDK_NAME,
     SDK_VERSION,
@@ -88,6 +91,7 @@ class DarkStrataCredentialCheck:
         retries: int = DEFAULT_RETRIES,
         enable_caching: bool = True,
         cache_ttl: int = DEFAULT_CACHE_TTL,
+        prefix_length: int = PREFIX_LENGTH,
     ) -> None:
         """
         Create a new DarkStrata credential check client.
@@ -100,6 +104,9 @@ class DarkStrataCredentialCheck:
             retries: Number of retry attempts for failed requests. Defaults to 3.
             enable_caching: Enable in-memory caching of API responses. Defaults to True.
             cache_ttl: Cache time-to-live in seconds. Defaults to 3600 (1 hour).
+            prefix_length: Hash characters sent to the API (5 or 6). 6 is ~2x faster
+                with a ~16x smaller response, but hides each check among ~500 hashes
+                instead of ~8,000. Defaults to 5.
 
         Raises:
             ValidationError: If the API key is missing or invalid.
@@ -118,6 +125,7 @@ class DarkStrataCredentialCheck:
             retries=retries,
             enable_caching=enable_caching,
             cache_ttl=cache_ttl,
+            prefix_length=prefix_length,
         )
         self._validate_options(options)
 
@@ -128,6 +136,7 @@ class DarkStrataCredentialCheck:
             retries=options.retries,
             enable_caching=options.enable_caching,
             cache_ttl=options.cache_ttl,
+            prefix_length=options.prefix_length,
         )
 
         self._cache: dict[str, CacheEntry] = {}
@@ -340,7 +349,7 @@ class DarkStrataCredentialCheck:
         hashed_credentials: list[HashedCredential],
         options: CheckOptions | None,
     ) -> list[CheckResult]:
-        grouped_by_prefix = group_by_prefix(hashed_credentials)
+        grouped_by_prefix = group_by_prefix(hashed_credentials, self._config.prefix_length)
 
         # Fetch data for each unique prefix
         prefix_responses: dict[str, ApiResponse] = {}
@@ -356,7 +365,7 @@ class DarkStrataCredentialCheck:
         results: list[CheckResult] = []
 
         for hashed_cred in hashed_credentials:
-            prefix = extract_prefix(hashed_cred.hash)
+            prefix = extract_prefix(hashed_cred.hash, self._config.prefix_length)
             response = prefix_responses.get(prefix)
 
             if response is None:
@@ -442,7 +451,7 @@ class DarkStrataCredentialCheck:
         options: CheckOptions | None,
     ) -> CheckResult:
         """Internal method to check a hash."""
-        prefix = extract_prefix(hash_value)
+        prefix = extract_prefix(hash_value, self._config.prefix_length)
         response = await self._fetch_prefix_data(prefix, options)
 
         found = is_hash_in_set(hash_value, response.headers.hmac_key, response.hashes)
@@ -702,6 +711,15 @@ class DarkStrataCredentialCheck:
 
         if options.cache_ttl <= 0:
             raise ValidationError("Cache TTL must be a positive number", field="cache_ttl")
+
+        if (
+            not isinstance(options.prefix_length, int)
+            or not MIN_PREFIX_LENGTH <= options.prefix_length <= MAX_PREFIX_LENGTH
+        ):
+            raise ValidationError(
+                f"Prefix length must be {MIN_PREFIX_LENGTH} or {MAX_PREFIX_LENGTH}",
+                field="prefix_length",
+            )
 
     def _validate_credential(self, email: str, password: str) -> None:
         """Validate a credential."""

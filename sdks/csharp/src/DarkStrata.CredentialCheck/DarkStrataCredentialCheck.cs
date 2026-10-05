@@ -72,7 +72,8 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
             Timeout = options.Timeout ?? Constants.DefaultTimeout,
             Retries = options.Retries ?? Constants.DefaultRetries,
             EnableCaching = options.EnableCaching ?? true,
-            CacheTtl = options.CacheTtl ?? Constants.DefaultCacheTtl
+            CacheTtl = options.CacheTtl ?? Constants.DefaultCacheTtl,
+            PrefixLength = options.PrefixLength ?? Constants.PrefixLength
         };
 
         _httpClient = handler is not null
@@ -225,7 +226,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
         CheckOptions? options,
         CancellationToken cancellationToken)
     {
-        var groupedByPrefix = CryptoUtils.GroupByPrefix(hashedCredentials, hc => hc.Hash);
+        var groupedByPrefix = CryptoUtils.GroupByPrefix(hashedCredentials, hc => hc.Hash, _config.PrefixLength);
 
         // Fetch data for each unique prefix in parallel
         var prefixResponses = new Dictionary<string, ApiResponse>();
@@ -246,7 +247,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
 
         foreach (var credential in hashedCredentials)
         {
-            var prefix = CryptoUtils.ExtractPrefix(credential.Hash);
+            var prefix = CryptoUtils.ExtractPrefix(credential.Hash, _config.PrefixLength);
 
             if (!prefixResponses.TryGetValue(prefix, out var response))
             {
@@ -333,7 +334,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
         CheckOptions? options,
         CancellationToken cancellationToken)
     {
-        var prefix = CryptoUtils.ExtractPrefix(hash);
+        var prefix = CryptoUtils.ExtractPrefix(hash, _config.PrefixLength);
         var response = await FetchPrefixDataAsync(prefix, options, cancellationToken);
 
         var found = CryptoUtils.IsHashInSet(hash, response.Headers.HmacKey, response.Hashes);
@@ -676,6 +677,14 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
         {
             throw new ValidationException("Cache TTL must be a positive duration", "cacheTtl");
         }
+
+        if (options.PrefixLength.HasValue &&
+            (options.PrefixLength.Value < Constants.MinPrefixLength || options.PrefixLength.Value > Constants.MaxPrefixLength))
+        {
+            throw new ValidationException(
+                $"Prefix length must be {Constants.MinPrefixLength} or {Constants.MaxPrefixLength}",
+                "prefixLength");
+        }
     }
 
     private static void ValidateCredential(string email, string password)
@@ -757,7 +766,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
         }
 
         [SetsRequiredMembers]
-        public ResolvedConfig(string apiKey, string baseUrl, TimeSpan timeout, int retries, bool enableCaching, TimeSpan cacheTtl)
+        public ResolvedConfig(string apiKey, string baseUrl, TimeSpan timeout, int retries, bool enableCaching, TimeSpan cacheTtl, int prefixLength)
         {
             ApiKey = apiKey;
             BaseUrl = baseUrl;
@@ -765,6 +774,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
             Retries = retries;
             EnableCaching = enableCaching;
             CacheTtl = cacheTtl;
+            PrefixLength = prefixLength;
         }
 
         public required string ApiKey { get; init; }
@@ -773,6 +783,7 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
         public required int Retries { get; init; }
         public required bool EnableCaching { get; init; }
         public required TimeSpan CacheTtl { get; init; }
+        public required int PrefixLength { get; init; }
     }
 
     private sealed record ApiResponse(string[] Hashes, ApiResponseHeaders Headers);

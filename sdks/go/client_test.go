@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 )
@@ -524,5 +525,54 @@ func TestMockAPIServerError(t *testing.T) {
 		if !apiErr.Retryable {
 			t.Error("500 error should be retryable")
 		}
+	}
+}
+
+func TestNewClientInvalidPrefixLength(t *testing.T) {
+	for _, n := range []int{4, 7} {
+		_, err := NewClient(ClientOptions{APIKey: "test-key", PrefixLength: n})
+		if _, ok := err.(*ValidationError); !ok {
+			t.Errorf("PrefixLength %d: error = %v, want ValidationError", n, err)
+		}
+	}
+}
+
+func TestMockAPICheckPrefixLength6(t *testing.T) {
+	testEmail := "test@example.com"
+	testPassword := "password123"
+	testHash := HashCredential(testEmail, testPassword)
+	hmacKey := "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+	expectedHMAC, _ := HMACSHA256(testHash, hmacKey)
+	wantPrefix := strings.ToUpper(testHash[:6])
+
+	var gotPrefix string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPrefix = r.URL.Query().Get("prefix")
+		w.Header().Set(HeaderPrefix, gotPrefix)
+		w.Header().Set(HeaderHMACKey, hmacKey)
+		w.Header().Set(HeaderHMACSource, "server")
+		w.Header().Set(HeaderTotalResults, "1")
+		json.NewEncoder(w).Encode([]string{expectedHMAC})
+	}))
+	defer server.Close()
+
+	client, err := NewClient(ClientOptions{
+		APIKey:       "test-key",
+		BaseURL:      server.URL + "/",
+		PrefixLength: 6,
+	})
+	if err != nil {
+		t.Fatalf("NewClient() error = %v", err)
+	}
+
+	result, err := client.Check(context.Background(), testEmail, testPassword, nil)
+	if err != nil {
+		t.Fatalf("Check() error = %v", err)
+	}
+	if gotPrefix != wantPrefix {
+		t.Errorf("prefix query = %q, want %q", gotPrefix, wantPrefix)
+	}
+	if !result.Found {
+		t.Error("Check() found = false, want true")
 	}
 }

@@ -69,6 +69,30 @@ final class ClientTest extends TestCase
         self::assertSame([], $this->requests);
     }
 
+    public function testInvalidPrefixLength(): void
+    {
+        foreach ([4, 7] as $len) {
+            try {
+                new Client(['apiKey' => 'k', 'prefixLength' => $len]);
+                self::fail("expected ValidationException for {$len}");
+            } catch (ValidationException $e) {
+                self::assertStringContainsString('Prefix length must be 5 or 6', $e->getMessage());
+            }
+        }
+    }
+
+    public function testSixCharacterPrefix(): void
+    {
+        $hash = Crypto::hashCredential('user@example.com', 'pw');
+        $c = $this->client([self::ok([Crypto::hmacSha256($hash, self::KEY)])], ['prefixLength' => 6]);
+
+        self::assertTrue($c->check('user@example.com', 'pw')->found);
+        self::assertStringEndsWith('?prefix=' . strtoupper(substr($hash, 0, 6)), $this->requests[0]['url']);
+
+        self::assertTrue($c->checkHashBatch([strtolower($hash)])[0]->found);
+        self::assertCount(1, $this->requests); // same 6-char prefix -> cache hit
+    }
+
     public function testNotFound(): void
     {
         $c = $this->client([self::ok(['00'])]);

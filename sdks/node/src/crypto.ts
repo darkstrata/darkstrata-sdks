@@ -172,12 +172,13 @@ export function secureWipe(_value: string): string {
  * @internal
  */
 export function groupByPrefix<T extends { hash: string }>(
-  credentials: T[]
+  credentials: T[],
+  prefixLength: number = PREFIX_LENGTH
 ): Map<string, T[]> {
   const groups = new Map<string, T[]>();
 
   for (const credential of credentials) {
-    const prefix = extractPrefix(credential.hash);
+    const prefix = extractPrefix(credential.hash, prefixLength);
     const existing = groups.get(prefix);
     if (existing) {
       existing.push(credential);

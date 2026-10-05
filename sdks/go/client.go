@@ -107,9 +107,9 @@ func (c *Client) CheckHashBatch(ctx context.Context, hashes []string, opts *Chec
 
 func (c *Client) checkHashedBatch(ctx context.Context, hashedCreds []HashedCredential, opts *CheckOptions) ([]CheckResult, error) {
 	// Group by prefix for efficient batching
-	groups := GroupByPrefix(hashedCreds, func(hc HashedCredential) string {
+	groups := GroupByPrefixN(hashedCreds, func(hc HashedCredential) string {
 		return hc.Hash
-	})
+	}, c.config.prefixLength)
 
 	// Process each prefix group
 	results := make([]CheckResult, len(hashedCreds))
@@ -171,7 +171,7 @@ func (c *Client) GetCacheSize() int {
 
 // checkWithHash performs the actual credential check
 func (c *Client) checkWithHash(ctx context.Context, email, hash string, opts *CheckOptions) (*CheckResult, error) {
-	prefix := ExtractPrefix(hash)
+	prefix := ExtractPrefixN(hash, c.config.prefixLength)
 
 	response, cached, err := c.fetchWithCache(ctx, prefix, opts)
 	if err != nil {
@@ -436,6 +436,7 @@ func resolveConfig(options ClientOptions) (resolvedConfig, error) {
 		retries:       DefaultRetries,
 		enableCaching: true,
 		cacheTTL:      DefaultCacheTTL,
+		prefixLength:  PrefixLength,
 	}
 
 	if options.BaseURL != "" {
@@ -456,6 +457,13 @@ func resolveConfig(options ClientOptions) (resolvedConfig, error) {
 
 	if options.CacheTTL > 0 {
 		config.cacheTTL = options.CacheTTL
+	}
+
+	if options.PrefixLength != 0 {
+		if options.PrefixLength < MinPrefixLength || options.PrefixLength > MaxPrefixLength {
+			return resolvedConfig{}, NewValidationError("prefixLength", fmt.Sprintf("prefix length must be %d or %d", MinPrefixLength, MaxPrefixLength))
+		}
+		config.prefixLength = options.PrefixLength
 	}
 
 	return config, nil

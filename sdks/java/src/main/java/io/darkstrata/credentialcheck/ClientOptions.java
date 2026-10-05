@@ -11,6 +11,7 @@ public class ClientOptions {
     private final int retries;
     private final boolean enableCaching;
     private final long cacheTTL;
+    private final int prefixLength;
 
     private ClientOptions(Builder builder) {
         this.apiKey = builder.apiKey;
@@ -19,6 +20,7 @@ public class ClientOptions {
         this.retries = builder.retries;
         this.enableCaching = builder.enableCaching;
         this.cacheTTL = builder.cacheTTL;
+        this.prefixLength = builder.prefixLength;
     }
 
     public String getApiKey() {
@@ -45,6 +47,10 @@ public class ClientOptions {
         return cacheTTL;
     }
 
+    public int getPrefixLength() {
+        return prefixLength;
+    }
+
     /**
      * Create a new builder with the required API key.
      */
@@ -59,6 +65,7 @@ public class ClientOptions {
         private int retries = Constants.DEFAULT_RETRIES;
         private boolean enableCaching = true;
         private long cacheTTL = Constants.DEFAULT_CACHE_TTL;
+        private int prefixLength = Constants.PREFIX_LENGTH;
 
         private Builder(String apiKey) {
             this.apiKey = apiKey;
@@ -101,6 +108,17 @@ public class ClientOptions {
          */
         public Builder cacheTTL(long cacheTTL) {
             this.cacheTTL = cacheTTL;
+            return this;
+        }
+
+        /**
+         * Set the number of hash characters sent to the API, 5 or 6 (default: 5).
+         *
+         * <p>5 hides each check among ~8,000 hashes; 6 among ~500, with a ~16x smaller
+         * response and roughly half the latency.</p>
+         */
+        public Builder prefixLength(int prefixLength) {
+            this.prefixLength = prefixLength;
             return this;
         }
 

@@ -73,8 +73,11 @@ client, err := credentialcheck.NewClient(credentialcheck.ClientOptions{
     Retries:       3,                        // Optional (default: 3)
     EnableCaching: &trueVal,                 // Optional (default: true)
     CacheTTL:      1 * time.Hour,           // Optional (default: 1 hour)
+    PrefixLength:  5,                        // Optional (default: 5)
 })
 ```
+
+`PrefixLength` (5 or 6, default 5): hash characters sent to the API. 6 is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000.
 
 ### Check Methods
 

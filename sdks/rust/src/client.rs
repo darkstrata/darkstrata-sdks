@@ -2,7 +2,8 @@
 
 use crate::constants::{
     response_headers, retry, API_KEY_HEADER, CREDENTIAL_CHECK_ENDPOINT, DEFAULT_BASE_URL,
-    DEFAULT_CACHE_TTL, DEFAULT_RETRIES, DEFAULT_TIMEOUT, USER_AGENT,
+    DEFAULT_CACHE_TTL, DEFAULT_RETRIES, DEFAULT_TIMEOUT, MAX_PREFIX_LENGTH, MIN_PREFIX_LENGTH,
+    PREFIX_LENGTH, USER_AGENT,
 };
 use crate::crypto::{
     group_by_prefix, is_hash_in_set, prepare_credential, prepare_hash, validate_client_hmac,
@@ -96,7 +97,7 @@ impl DarkStrataCredentialCheck {
         password: &str,
         options: Option<CheckOptions>,
     ) -> Result<CheckResult> {
-        let hashed = prepare_credential(email, password)?;
+        let hashed = prepare_credential(email, password, self.config.prefix_length)?;
         self.check_hashed_credential(&hashed, options.as_ref())
             .await
     }
@@ -119,7 +120,7 @@ impl DarkStrataCredentialCheck {
         hash: &str,
         options: Option<CheckOptions>,
     ) -> Result<CheckResult> {
-        let hashed = prepare_hash(hash)?;
+        let hashed = prepare_hash(hash, self.config.prefix_length)?;
         self.check_hashed_credential(&hashed, options.as_ref())
             .await
     }
@@ -149,7 +150,11 @@ impl DarkStrataCredentialCheck {
         // Prepare all credentials
         let mut hashed_credentials = Vec::with_capacity(credentials.len());
         for cred in credentials {
-            hashed_credentials.push(prepare_credential(&cred.email, &cred.password)?);
+            hashed_credentials.push(prepare_credential(
+                &cred.email,
+                &cred.password,
+                self.config.prefix_length,
+            )?);
         }
 
         self.check_hashed_batch(&hashed_credentials, options).await
@@ -177,7 +182,7 @@ impl DarkStrataCredentialCheck {
 
         let mut hashed_credentials = Vec::with_capacity(hashes.len());
         for hash in hashes {
-            hashed_credentials.push(prepare_hash(hash)?);
+            hashed_credentials.push(prepare_hash(hash, self.config.prefix_length)?);
         }
 
         self.check_hashed_batch(&hashed_credentials, options).await
@@ -254,6 +259,18 @@ impl DarkStrataCredentialCheck {
             }
         }
 
+        if let Some(length) = options.prefix_length {
+            if !(MIN_PREFIX_LENGTH..=MAX_PREFIX_LENGTH).contains(&length) {
+                return Err(DarkStrataError::validation_field(
+                    "prefix_length",
+                    format!(
+                        "Prefix length must be {} or {}",
+                        MIN_PREFIX_LENGTH, MAX_PREFIX_LENGTH
+                    ),
+                ));
+            }
+        }
+
         Ok(())
     }
 
@@ -267,6 +284,7 @@ impl DarkStrataCredentialCheck {
             retries: options.retries.unwrap_or(DEFAULT_RETRIES),
             enable_caching: options.enable_caching.unwrap_or(true),
             cache_ttl: options.cache_ttl.unwrap_or(DEFAULT_CACHE_TTL),
+            prefix_length: options.prefix_length.unwrap_or(PREFIX_LENGTH),
         })
     }
 
@@ -587,6 +605,12 @@ mod tests {
         // Zero cache TTL
         let options = ClientOptions::new("test-key").cache_ttl(Duration::ZERO);
         assert!(DarkStrataCredentialCheck::new(options).is_err());
+
+        // Prefix length outside 5..=6
+        for length in [4, 7] {
+            let options = ClientOptions::new("test-key").prefix_length(length);
+            assert!(DarkStrataCredentialCheck::new(options).is_err());
+        }
     }
 
     #[test]
@@ -600,6 +624,7 @@ mod tests {
         assert_eq!(config.retries, DEFAULT_RETRIES);
         assert!(config.enable_caching);
         assert_eq!(config.cache_ttl, DEFAULT_CACHE_TTL);
+        assert_eq!(config.prefix_length, PREFIX_LENGTH);
     }
 
     #[test]

@@ -139,7 +139,11 @@ pub fn group_by_prefix(
 }
 
 /// Prepare a credential for checking by computing its hash and prefix.
-pub fn prepare_credential(email: &str, password: &str) -> Result<HashedCredential> {
+pub fn prepare_credential(
+    email: &str,
+    password: &str,
+    prefix_length: usize,
+) -> Result<HashedCredential> {
     if email.is_empty() {
         return Err(DarkStrataError::validation_field(
             "email",
@@ -154,7 +158,7 @@ pub fn prepare_credential(email: &str, password: &str) -> Result<HashedCredentia
     }
 
     let hash = hash_credential(email, password);
-    let prefix = extract_prefix(&hash);
+    let prefix = extract_prefix_with_length(&hash, prefix_length);
 
     Ok(HashedCredential {
         credential: Some(crate::types::Credential {
@@ -167,7 +171,7 @@ pub fn prepare_credential(email: &str, password: &str) -> Result<HashedCredentia
 }
 
 /// Prepare a pre-computed hash for checking.
-pub fn prepare_hash(hash: &str) -> Result<HashedCredential> {
+pub fn prepare_hash(hash: &str, prefix_length: usize) -> Result<HashedCredential> {
     let hash_upper = hash.to_uppercase();
 
     if !is_valid_hash(&hash_upper, None) {
@@ -177,7 +181,7 @@ pub fn prepare_hash(hash: &str) -> Result<HashedCredential> {
         )));
     }
 
-    let prefix = extract_prefix(&hash_upper);
+    let prefix = extract_prefix_with_length(&hash_upper, prefix_length);
 
     Ok(HashedCredential {
         credential: None,
@@ -326,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_prepare_credential() {
-        let result = prepare_credential("test@example.com", "password123").unwrap();
+        let result = prepare_credential("test@example.com", "password123", PREFIX_LENGTH).unwrap();
         assert_eq!(result.hash.len(), 64);
         assert_eq!(result.prefix.len(), PREFIX_LENGTH);
         assert!(result.credential.is_some());
@@ -334,20 +338,20 @@ mod tests {
 
     #[test]
     fn test_prepare_credential_empty_email() {
-        let result = prepare_credential("", "password123");
+        let result = prepare_credential("", "password123", PREFIX_LENGTH);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_prepare_credential_empty_password() {
-        let result = prepare_credential("test@example.com", "");
+        let result = prepare_credential("test@example.com", "", PREFIX_LENGTH);
         assert!(result.is_err());
     }
 
     #[test]
     fn test_prepare_hash() {
         let hash = "5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8000000000000000000000000";
-        let result = prepare_hash(hash).unwrap();
+        let result = prepare_hash(hash, PREFIX_LENGTH).unwrap();
         assert_eq!(result.hash, hash);
         assert_eq!(result.prefix, "5BAA6");
         assert!(result.credential.is_none());
@@ -355,7 +359,7 @@ mod tests {
 
     #[test]
     fn test_prepare_hash_invalid() {
-        let result = prepare_hash("not-a-valid-hash");
+        let result = prepare_hash("not-a-valid-hash", PREFIX_LENGTH);
         assert!(result.is_err());
     }
 

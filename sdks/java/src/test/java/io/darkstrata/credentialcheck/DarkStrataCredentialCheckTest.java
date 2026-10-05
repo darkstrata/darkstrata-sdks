@@ -54,6 +54,51 @@ class DarkStrataCredentialCheckTest {
     }
 
     @Test
+    @DisplayName("Constructor rejects prefix lengths other than 5 or 6")
+    void constructorValidatesPrefixLength() {
+        for (int prefixLength : new int[]{4, 7}) {
+            assertThrows(ValidationException.class, () ->
+                    new DarkStrataCredentialCheck(ClientOptions.builder("test-api-key").prefixLength(prefixLength).build())
+            );
+        }
+    }
+
+    @Test
+    @DisplayName("check sends a 6-character prefix when prefixLength is 6")
+    void checkSendsSixCharacterPrefix() throws Exception {
+        String email = "test@example.com";
+        String password = "password123";
+        String hash = CryptoUtils.hashCredential(email, password);
+        String expectedPrefix = hash.substring(0, 6).toUpperCase();
+        String hmacKey = "A".repeat(64);
+
+        mockServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("X-Prefix", expectedPrefix)
+                .setHeader("X-HMAC-Key", hmacKey)
+                .setHeader("X-HMAC-Source", "server")
+                .setHeader("X-Total-Results", "1")
+                .setBody("[\"" + CryptoUtils.hmacSha256(hash, hmacKey) + "\"]")
+        );
+
+        try (DarkStrataCredentialCheck sixClient = new DarkStrataCredentialCheck(
+                ClientOptions.builder("test-api-key")
+                        .baseUrl(mockServer.url("/").toString())
+                        .timeout(5000)
+                        .retries(0)
+                        .enableCaching(false)
+                        .prefixLength(6)
+                        .build()
+        )) {
+            CheckResult result = sixClient.check(email, password);
+
+            RecordedRequest request = mockServer.takeRequest();
+            assertEquals(expectedPrefix, request.getRequestUrl().queryParameter("prefix"));
+            assertTrue(result.isFound());
+        }
+    }
+
+    @Test
     @DisplayName("check sends correct request")
     void checkSendsCorrectRequest() throws Exception {
         String hmacKey = "A".repeat(64);

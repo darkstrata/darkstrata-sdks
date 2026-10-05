@@ -188,16 +188,18 @@ public static partial class CryptoUtils
     /// <typeparam name="T">The credential type (must have a Hash property).</typeparam>
     /// <param name="credentials">Array of credential objects with Hash property.</param>
     /// <param name="hashSelector">Function to extract the hash from a credential.</param>
+    /// <param name="prefixLength">Prefix length: 5 (default) or 6.</param>
     /// <returns>Dictionary of prefix to list of credentials.</returns>
     public static Dictionary<string, List<T>> GroupByPrefix<T>(
         IEnumerable<T> credentials,
-        Func<T, string> hashSelector)
+        Func<T, string> hashSelector,
+        int prefixLength = PrefixLength)
     {
         var groups = new Dictionary<string, List<T>>();
 
         foreach (var credential in credentials)
         {
-            var prefix = ExtractPrefix(hashSelector(credential));
+            var prefix = ExtractPrefix(hashSelector(credential), prefixLength);
             if (!groups.TryGetValue(prefix, out var list))
             {
                 list = new List<T>();

@@ -105,6 +105,7 @@ DarkStrataCredentialCheck(
     retries: int = 3,
     enable_caching: bool = True,
     cache_ttl: int = 3600,
+    prefix_length: int = 5,
 )
 ```
 
@@ -118,6 +119,7 @@ DarkStrataCredentialCheck(
 | `retries` | `int` | `3` | Number of retry attempts |
 | `enable_caching` | `bool` | `True` | Enable response caching |
 | `cache_ttl` | `int` | `3600` | Cache TTL in seconds (1 hour) |
+| `prefix_length` | `int` | `5` | Hash characters sent to the API. 6 is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000. |
 
 #### Methods
 

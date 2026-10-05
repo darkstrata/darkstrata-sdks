@@ -106,10 +106,15 @@ func IsValidPrefix(prefix string) bool {
 
 // GroupByPrefix groups credentials by their hash prefix for efficient batch processing
 func GroupByPrefix[T any](items []T, getHash func(T) string) map[string][]T {
+	return GroupByPrefixN(items, getHash, PrefixLength)
+}
+
+// GroupByPrefixN groups items by the first n characters of their hash (uppercase).
+func GroupByPrefixN[T any](items []T, getHash func(T) string, n int) map[string][]T {
 	groups := make(map[string][]T)
 	for _, item := range items {
 		hash := getHash(item)
-		prefix := ExtractPrefix(hash)
+		prefix := ExtractPrefixN(hash, n)
 		groups[prefix] = append(groups[prefix], item)
 	}
 	return groups

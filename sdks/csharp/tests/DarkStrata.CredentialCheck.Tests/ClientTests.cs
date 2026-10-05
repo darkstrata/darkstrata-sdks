@@ -18,6 +18,17 @@ public class ClientTests
         Assert.NotNull(client);
     }
 
+    [Theory]
+    [InlineData(4)]
+    [InlineData(7)]
+    public void Constructor_WithInvalidPrefixLength_ThrowsValidationException(int prefixLength)
+    {
+        var exception = Assert.Throws<ValidationException>(() =>
+            new DarkStrataCredentialCheck(new ClientOptions { ApiKey = ValidApiKey, PrefixLength = prefixLength }));
+
+        Assert.Equal("prefixLength", exception.Field);
+    }
+
     [Fact]
     public void Constructor_WithNullApiKey_ThrowsValidationException()
     {

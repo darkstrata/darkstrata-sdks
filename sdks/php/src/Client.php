@@ -22,6 +22,8 @@ use DarkStrata\CredentialCheck\Exception\ValidationException;
  *  - retries       (int, default 3)
  *  - enableCaching (bool, default true)
  *  - cacheTtl      (int seconds, default 3600)
+ *  - prefixLength  (int 5 or 6, default 5) hash characters sent to the API. 6 is ~2x faster with a
+ *                  ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000
  *  - transport     (callable, testing only) fn(string $url, string[] $headers, float $timeout): array{int, array<string,string>, string}
  *
  * Check options (second argument to check*):
@@ -36,6 +38,7 @@ final class Client
     private int $retries;
     private bool $enableCaching;
     private int $cacheTtl;
+    private int $prefixLength;
     /** @var callable */
     private $transport;
     /** @var array<string, array{response: array, timestamp: int}> */
@@ -53,10 +56,18 @@ final class Client
         $this->retries = max(0, (int) ($options['retries'] ?? Constants::DEFAULT_RETRIES));
         $this->enableCaching = (bool) ($options['enableCaching'] ?? true);
         $this->cacheTtl = (int) ($options['cacheTtl'] ?? Constants::DEFAULT_CACHE_TTL);
+        $prefixLength = $options['prefixLength'] ?? Constants::PREFIX_LENGTH;
+        if (!is_int($prefixLength) || $prefixLength < Constants::MIN_PREFIX_LENGTH || $prefixLength > Constants::MAX_PREFIX_LENGTH) {
+            throw new ValidationException(
+                'prefixLength',
+                sprintf('Prefix length must be %d or %d', Constants::MIN_PREFIX_LENGTH, Constants::MAX_PREFIX_LENGTH)
+            );
+        }
+        $this->prefixLength = $prefixLength;
         $this->transport = $options['transport'] ?? [$this, 'curlTransport'];
     }
 
-    /** Check an email/password pair. Only a 5-char prefix of SHA-256("email:password") leaves this process. */
+    /** Check an email/password pair. Only a 5- or 6-char prefix (prefixLength) of SHA-256("email:password") leaves this process. */
     public function check(string $email, string $password, array $options = []): CheckResult
     {
         if ($email === '') {
@@ -139,7 +150,7 @@ final class Client
         $responses = [];
         $results = [];
         foreach ($hashes as $i => $hash) {
-            $prefix = Crypto::extractPrefix($hash);
+            $prefix = Crypto::extractPrefix($hash, $this->prefixLength);
             if (!isset($responses[$prefix])) {
                 $responses[$prefix] = $this->fetchWithCache($prefix, $query);
             }

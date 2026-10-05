@@ -19,6 +19,9 @@ pub struct ClientOptions {
     pub enable_caching: Option<bool>,
     /// Cache time-to-live. Defaults to 1 hour.
     pub cache_ttl: Option<Duration>,
+    /// Hash characters sent to the API: 5 (default) or 6. 6 is ~2x faster with a
+    /// ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000.
+    pub prefix_length: Option<usize>,
 }
 
 impl ClientOptions {
@@ -31,6 +34,7 @@ impl ClientOptions {
             retries: None,
             enable_caching: None,
             cache_ttl: None,
+            prefix_length: None,
         }
     }
 
@@ -63,6 +67,12 @@ impl ClientOptions {
         self.cache_ttl = Some(ttl);
         self
     }
+
+    /// Set the k-anonymity prefix length (5 or 6).
+    pub fn prefix_length(mut self, length: usize) -> Self {
+        self.prefix_length = Some(length);
+        self
+    }
 }
 
 /// Resolved client configuration with defaults applied.
@@ -74,6 +84,7 @@ pub(crate) struct ResolvedConfig {
     pub retries: u32,
     pub enable_caching: bool,
     pub cache_ttl: Duration,
+    pub prefix_length: usize,
 }
 
 /// Options for individual check operations.

@@ -366,6 +366,46 @@ public class HttpClientTests : IDisposable
     }
 
     [Fact]
+    public async Task CheckAsync_WithPrefixLength6_SendsSixCharPrefixAndFindsHash()
+    {
+        var email = "test@example.com";
+        var password = "password123";
+        var hash = CryptoUtils.HashCredential(email, password);
+        var expectedPrefix = hash[..6].ToUpperInvariant();
+        var hmacKey = new string('A', 64);
+
+        _handler.SetResponse(HttpStatusCode.OK,
+            JsonSerializer.Serialize(new[] { CryptoUtils.HmacSha256(hash, hmacKey) }),
+            new Dictionary<string, string>
+            {
+                ["X-Prefix"] = expectedPrefix,
+                ["X-HMAC-Key"] = hmacKey,
+                ["X-HMAC-Source"] = "server",
+                ["X-Total-Results"] = "1"
+            });
+
+        using var client = new DarkStrataCredentialCheck(
+            new ClientOptions
+            {
+                ApiKey = "test-api-key",
+                BaseUrl = "https://api.test.local/v1/",
+                Retries = 0,
+                EnableCaching = false,
+                PrefixLength = 6
+            },
+            _handler);
+
+        var single = await client.CheckAsync(email, password);
+        Assert.Contains($"prefix={expectedPrefix}", _handler.LastRequestUri!.Query);
+        Assert.True(single.Found);
+        Assert.Equal(expectedPrefix, single.Metadata.Prefix);
+
+        var batch = await client.CheckBatchAsync(new[] { new Credential(email, password) });
+        Assert.Contains($"prefix={expectedPrefix}", _handler.LastRequestUri!.Query);
+        Assert.True(batch.Single().Found);
+    }
+
+    [Fact]
     public async Task CheckAsync_MetadataPopulatedCorrectly()
     {
         var hash = CryptoUtils.HashCredential("test@example.com", "password123");

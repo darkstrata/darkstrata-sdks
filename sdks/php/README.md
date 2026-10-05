@@ -81,10 +81,13 @@ $client = new Client([
     'retries'       => 3,                               // Optional, retry attempts for retryable errors
     'enableCaching' => true,                            // Optional
     'cacheTtl'      => 3600,                            // Optional, seconds
+    'prefixLength'  => 5,                               // Optional, 5 or 6 (see below)
 ]);
 ```
 
-Throws `ValidationException` if `apiKey` is missing.
+`prefixLength`: hash characters sent to the API. `6` is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000.
+
+Throws `ValidationException` if `apiKey` is missing or `prefixLength` is not 5 or 6.
 
 #### `check(string $email, string $password, array $options = []): CheckResult`
 

@@ -208,6 +208,7 @@ The main client for interacting with the DarkStrata API.
 | `retries` | `Option<u32>` | 3 | Number of retry attempts |
 | `enable_caching` | `Option<bool>` | true | Enable response caching |
 | `cache_ttl` | `Option<Duration>` | 1 hour | Cache time-to-live |
+| `prefix_length` | `Option<usize>` | 5 | Hash characters sent to the API (5 or 6). 6 is ~2x faster with a ~16x smaller response, but hides each check among ~500 hashes instead of ~8,000 |
 
 ### `CheckOptions`
 
