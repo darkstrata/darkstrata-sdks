@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.6.0...v2.7.0) (2026-10-05)
+
+
+### Features
+
+* **sdks:** optional 6-character prefix for faster Credential Checks ([#23](https://github.com/darkstrata/darkstrata-sdks/issues/23)) ([189771f](https://github.com/darkstrata/darkstrata-sdks/commit/189771f202bf29372eff468a675a71432fbb0f11))
+
 # [2.6.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.5.1...v2.6.0) (2026-09-16)
 
 
