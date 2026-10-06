@@ -272,6 +272,9 @@ final class Client
             CURLOPT_HTTPHEADER => $headers,
             CURLOPT_TIMEOUT_MS => (int) ($timeout * 1000),
             CURLOPT_FOLLOWLOCATION => false,
+            // '' = advertise every encoding this libcurl supports and decode the
+            // response; a 5-character prefix is ~550 KB of JSON uncompressed.
+            CURLOPT_ENCODING => '',
             CURLOPT_HEADERFUNCTION => static function ($ch, string $line) use (&$responseHeaders): int {
                 $parts = explode(':', $line, 2);
                 if (count($parts) === 2) {

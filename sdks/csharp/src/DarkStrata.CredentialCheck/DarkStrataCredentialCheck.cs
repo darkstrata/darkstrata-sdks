@@ -76,9 +76,13 @@ public sealed partial class DarkStrataCredentialCheck : IDarkStrataCredentialChe
             PrefixLength = options.PrefixLength ?? Constants.PrefixLength
         };
 
-        _httpClient = handler is not null
-            ? new HttpClient(handler) { BaseAddress = new Uri(_config.BaseUrl), Timeout = _config.Timeout }
-            : new HttpClient { BaseAddress = new Uri(_config.BaseUrl), Timeout = _config.Timeout };
+        // HttpClient sends no Accept-Encoding by default; a 5-character prefix is
+        // ~550 KB of JSON uncompressed, about half that gzipped.
+        handler ??= new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+        };
+        _httpClient = new HttpClient(handler) { BaseAddress = new Uri(_config.BaseUrl), Timeout = _config.Timeout };
 
         _httpClient.DefaultRequestHeaders.Add(Constants.ApiKeyHeader, _config.ApiKey);
         _httpClient.DefaultRequestHeaders.UserAgent.Add(
