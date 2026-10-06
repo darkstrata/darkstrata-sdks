@@ -1,3 +1,10 @@
+## [2.7.1](https://github.com/darkstrata/darkstrata-sdks/compare/v2.7.0...v2.7.1) (2026-10-06)
+
+
+### Bug Fixes
+
+* **sdks:** request gzip-compressed responses in the C#, PHP and Rust SDKs ([#24](https://github.com/darkstrata/darkstrata-sdks/issues/24)) ([a92194a](https://github.com/darkstrata/darkstrata-sdks/commit/a92194a3b0675d0549ccb3811db42c9bec58f5a5))
+
 # [2.7.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.6.0...v2.7.0) (2026-10-05)
 
 
