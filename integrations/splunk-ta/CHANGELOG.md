@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `app.manifest` `platformRequirements.splunk.Enterprise` is `*` again. The
+  `>=9.0` floor set in 1.1.2 has no match in SLIM 1.2.8's version list, so
+  `slim validate` (and CI) failed on every build since. The Splunk 9.0 minimum
+  is still documented in the README and the Splunkbase listing.
 - `darkstrata:stix:alert` read `alert_name`, `alert_description` and
   `alert_severity` from the second bundle object; the report is the first
   (`objects{0}`).
