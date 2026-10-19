@@ -358,7 +358,8 @@ The confidence threshold maps to DarkStrata threat scores:
     "credential-exposure",
     "source:malware",
     "flow:outbound",
-    "severity-high"
+    "mitre:T1555.003",
+    "mitre:T1589.001"
   ]
 }
 ```
@@ -370,8 +371,11 @@ The confidence threshold maps to DarkStrata threat scores:
 | `objects.0.account_login` | `user`      | Compromised email or username            |
 | `objects.0.account_type`  | `user_type` | `email` or `username`                    |
 | `objects.1.value`         | `dest`      | Service domain where credentials exposed |
-| `labels[]`                | `labels`    | Metadata tags (source, flow, severity)   |
-| `created`                 | `_time`     | Event timestamp                          |
+| `labels[]`                | `labels{}`  | Metadata tags (source, flow, ATT&CK)     |
+| `labels[]` `source:*`     | `source_type` | `malware`, `breach` or `unknown`       |
+| `labels[]` `flow:*`       | `flow_direction` | `inbound`, `outbound` or `unknown`  |
+| `labels[]` `mitre:*`      | `mitre_technique_id`, `mitre_technique`, `annotations.mitre_attack` | ATT&CK technique ids (multivalue) |
+| `modified`                | `_time`     | Event timestamp                          |
 
 ### Labels Reference
 
@@ -379,7 +383,37 @@ The confidence threshold maps to DarkStrata threat scores:
 | ------------- | ------------------------------------------- | ------------------ |
 | `source:*`    | `malware`, `breach`                         | Credential source  |
 | `flow:*`      | `inbound`, `outbound`                       | Exposure direction |
-| `severity-*`  | `info`, `low`, `medium`, `high`, `critical` | Risk level         |
+| `mitre:*`     | ATT&CK technique id, e.g. `T1555.003`, `T1589.001` | Technique the finding evidences |
+
+> **Severity:** credential-level events (`darkstrata:stix:observed-data`) do not
+> currently carry `severity-*` labels, so the `severity` field, the
+> `darkstrata_high_severity` macro, the `darkstrata_critical_exposure` event type
+> and the **Critical Credential Exposure** correlation search do not match these
+> events. Severity labels appear only on alert reports (`alert_severity` on
+> `darkstrata:stix:alert`).
+
+### MITRE ATT&CK Fields
+
+Each credential exposure is labelled with the ATT&CK techniques it evidences
+(for example T1555.003 Credentials from Web Browsers for infostealer logs and
+T1589.001 Gather Victim Identity Information: Credentials). The add-on extracts
+them at search time:
+
+| Field                      | Sourcetypes                    | Value                                   |
+| -------------------------- | ------------------------------ | --------------------------------------- |
+| `mitre_technique_id`       | observed-data, alert           | Technique ids, multivalue, deduplicated |
+| `mitre_technique`          | observed-data, alert           | Same ids (no technique names are sent)  |
+| `annotations.mitre_attack` | observed-data, alert           | Same ids, for ES annotation enrichment  |
+
+Events ingested before the API added these labels have no ATT&CK fields; the
+correlation searches' static annotations (below) still apply. ATT&CK tactics are
+not sent in the Splunk-format feeds the add-on collects, so there is no
+`mitre_tactic` field.
+
+```spl
+sourcetype="darkstrata:stix:observed-data" mitre_technique_id=*
+| stats count by mitre_technique_id
+```
 
 ---
 
@@ -503,6 +537,20 @@ user, description, threat_key, weight, first_seen, last_seen, email
 | **DarkStrata - Third Party Credential Exposure**       | Outbound flow           | Medium   | 50         |
 | **DarkStrata - Potential Malware Campaign**            | 3+ users from malware   | High     | 90         |
 | **DarkStrata - New Alert Received**                    | New alert bundles       | Info     | -          |
+
+Each correlation search carries static MITRE ATT&CK annotations, shown in ES
+on the notable event and used by the `mitre_attack` risk annotations:
+
+| Search                              | `annotations.mitre_attack` |
+| ----------------------------------- | -------------------------- |
+| Critical Credential Exposure        | T1589.001                  |
+| Malware Credential Detected         | T1555.003, T1589.001       |
+| Third Party Credential Exposure     | T1589.001                  |
+| Potential Malware Campaign          | T1555.003, T1589.001       |
+
+The searches also output the per-event `mitre_technique_id` and
+`annotations.mitre_attack` fields, so notables include any further techniques
+the finding evidences (for example T1539 when session cookies were stolen).
 
 ### Enabling Correlation Searches
 
