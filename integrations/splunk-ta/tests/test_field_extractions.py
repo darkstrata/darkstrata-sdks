@@ -309,3 +309,65 @@ class TestCIMFieldCoverage:
         assert "threat_source" in format_fields, "Missing CIM field 'threat_source' from transforms"
         assert "severity" in format_fields, "Missing CIM field 'severity' from transforms"
         assert "dest_domain" in format_fields, "Missing CIM field 'dest_domain' from transforms"
+
+
+def mitre_ids(transforms_conf: configparser.ConfigParser, raw: str) -> list[str]:
+    """Emulate REPORT + MV_ADD then the props.conf mvdedup."""
+    regex = transforms_conf.get("darkstrata_extract_mitre_technique", "REGEX")
+    return list(dict.fromkeys(re.findall(regex, raw)))
+
+
+class TestExtractMitreTechnique:
+    """Test darkstrata_extract_mitre_technique regex and its props.conf wiring."""
+
+    def test_extracts_all_labels_from_observed_data(self, transforms_conf: configparser.ConfigParser) -> None:
+        raw = json.dumps(
+            {
+                "type": "observed-data",
+                "labels": ["darkstrata", "source:malware", "flow:outbound", "mitre:T1555.003", "mitre:T1589.001"],
+            }
+        )
+        assert mitre_ids(transforms_conf, raw) == ["T1555.003", "T1589.001"]
+        assert transforms_conf.get("darkstrata_extract_mitre_technique", "MV_ADD") == "true"
+
+    def test_dedups_across_alert_bundle(self, transforms_conf: configparser.ConfigParser) -> None:
+        bundle = {
+            "type": "bundle",
+            "objects": [
+                {"type": "report", "name": "Alert", "labels": ["darkstrata", "severity-high"]},
+                {"type": "observed-data", "labels": ["mitre:T1589.001", "mitre:T1539"]},
+                {"type": "observed-data", "labels": ["mitre:T1589.001", "mitre:T1110.004"]},
+            ],
+        }
+        assert mitre_ids(transforms_conf, json.dumps(bundle)) == ["T1589.001", "T1539", "T1110.004"]
+
+    @pytest.mark.parametrize("label", ["mitre:TA0006", "mitre:T155", "mitre:S1240", "attack:T1589.001"])
+    def test_ignores_non_technique_labels(self, transforms_conf: configparser.ConfigParser, label: str) -> None:
+        assert mitre_ids(transforms_conf, json.dumps({"labels": [label]})) == []
+
+    def test_no_labels_yields_nothing(
+        self, transforms_conf: configparser.ConfigParser, sample_observed_data_json: str
+    ) -> None:
+        assert mitre_ids(transforms_conf, sample_observed_data_json) == []
+
+    @pytest.mark.parametrize("sourcetype", ["darkstrata:stix:observed-data", "darkstrata:stix:alert"])
+    def test_props_wires_mitre_fields(self, sourcetype: str) -> None:
+        props = parse_conf(DEFAULT_DIR / "props.conf")
+        assert props.get(sourcetype, "REPORT-mitre_technique_id") == "darkstrata_extract_mitre_technique"
+        for field in ("mitre_technique_id", "mitre_technique", "annotations.mitre_attack"):
+            assert props.get(sourcetype, f"EVAL-{field}") == "mvdedup(mitre_technique_id)"
+
+
+class TestPropsPaths:
+    """Guard the JSON paths props.conf reads against the API's event shapes."""
+
+    def test_alert_reads_report_at_index_zero(self) -> None:
+        props = parse_conf(DEFAULT_DIR / "props.conf")
+        for key in ("EVAL-alert_name", "EVAL-alert_description", "EVAL-alert_severity"):
+            value = props.get("darkstrata:stix:alert", key)
+            assert "objects{0}." in value and "objects.1" not in value, key
+
+    def test_observed_data_labels_use_json_array_field(self) -> None:
+        props = parse_conf(DEFAULT_DIR / "props.conf")
+        for key in ("EVAL-source_type", "EVAL-flow_direction"):
+            assert "'labels{}'" in props.get("darkstrata:stix:observed-data", key), key

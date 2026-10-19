@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import configparser
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -277,3 +278,24 @@ class TestSavedSearchesConf:
                 assert quote_count % 2 == 0, (
                     f"savedsearches.conf [{section}] has unbalanced quotes ({quote_count} double quotes)"
                 )
+
+    def test_correlation_searches_have_mitre_annotations(self, savedsearches_conf: configparser.ConfigParser) -> None:
+        """Every ES correlation search carries valid MITRE ATT&CK annotations JSON."""
+        expected = {
+            "DarkStrata - Critical Credential Exposure Detected": ["T1589.001"],
+            "DarkStrata - Malware Credential Detected": ["T1555.003", "T1589.001"],
+            "DarkStrata - Third Party Credential Exposure": ["T1589.001"],
+            "DarkStrata - Potential Malware Campaign": ["T1555.003", "T1589.001"],
+        }
+        correlation = [
+            s
+            for s in savedsearches_conf.sections()
+            if savedsearches_conf.has_option(s, "action.correlationsearch.enabled")
+        ]
+        assert sorted(correlation) == sorted(expected)
+        for section, techniques in expected.items():
+            annotations = json.loads(savedsearches_conf.get(section, "action.correlationsearch.annotations"))
+            assert annotations == {"mitre_attack": techniques}, section
+            assert all(re.fullmatch(r"T\d{4}(\.\d{3})?", t) for t in techniques)
+            assert savedsearches_conf.get(section, "action.correlationsearch.label").strip()
+            assert "annotations.mitre_attack" in savedsearches_conf.get(section, "search"), section

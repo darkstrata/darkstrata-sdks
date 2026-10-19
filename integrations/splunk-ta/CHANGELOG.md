@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-19
+
+### Added
+
+- MITRE ATT&CK annotations on the four Enterprise Security correlation searches
+  (`action.correlationsearch.annotations`): Malware Credential Detected and
+  Potential Malware Campaign carry T1555.003 and T1589.001; Third Party
+  Credential Exposure and Critical Credential Exposure carry T1589.001.
+- Per-event ATT&CK techniques. The DarkStrata API labels each credential
+  exposure with `mitre:<technique id>`; the add-on extracts these into the
+  multivalue fields `mitre_technique_id`, `mitre_technique` and
+  `annotations.mitre_attack` on `darkstrata:stix:observed-data` and
+  `darkstrata:stix:alert` (deduplicated across the bundle). The correlation
+  searches pass them through to notable events.
+
+### Fixed
+
+- `darkstrata:stix:alert` read `alert_name`, `alert_description` and
+  `alert_severity` from the second bundle object; the report is the first
+  (`objects{0}`).
+- `source_type` and `flow_direction` on `darkstrata:stix:observed-data` always
+  evaluated to `unknown` because they read `labels` instead of the
+  JSON-extracted `labels{}`.
+- `user`, `user_type`, `dest`, `threat_key`, `threat_match_value` and
+  `signature` on `darkstrata:stix:observed-data` read a non-existent `objects`
+  field; they now read `objects.0.*` / `objects.1.*` from the raw event.
+- Reconciled the `pyproject.toml` version with the rest of the add-on.
+
 ## [1.1.2] - 2026-07-31
 
 ### Fixed
@@ -104,7 +132,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Proxy passwords encrypted
 - No secrets committed to package
 
-[Unreleased]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.1.1...HEAD
+[Unreleased]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.2.0...HEAD
+[1.2.0]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.1.2...splunk-ta-v1.2.0
+[1.1.2]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.1.1...splunk-ta-v1.1.2
 [1.1.1]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.1.0...splunk-ta-v1.1.1
 [1.1.0]: https://github.com/darkstrata/darkstrata-sdks/compare/splunk-ta-v1.0.0...splunk-ta-v1.1.0
 [1.0.0]: https://github.com/darkstrata/darkstrata-sdks/releases/tag/splunk-ta-v1.0.0
