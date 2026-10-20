@@ -149,6 +149,8 @@ jobs:
     if: github.event_name == 'release'
     steps:
       - name: Post release notes
+        # No checkout in this job, so the workflow default working directory does not exist
+        working-directory: .
         run: |
           echo "📦 Splunk TA Release ${{ github.event.release.tag_name }} complete!"
           echo ""
