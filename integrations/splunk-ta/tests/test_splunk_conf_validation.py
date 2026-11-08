@@ -149,7 +149,9 @@ class TestTransformsConf:
         collections = SplunkConfParser.parse(DEFAULT_DIR / "collections.conf")
         searches = SplunkConfParser.parse(DEFAULT_DIR / "savedsearches.conf")
         for section in searches.sections():
-            for target in re.findall(r"outputlookup(?:\s+\w+=\S+)*\s+([\w.]+)", searches.get(section, "search", fallback="")):
+            for target in re.findall(
+                r"outputlookup(?:\s+\w+=\S+)*\s+([\w.]+)", searches.get(section, "search", fallback="")
+            ):
                 if target.endswith(".csv"):
                     assert (PACKAGE_DIR / "lookups" / target).exists(), f"[{section}] writes missing CSV {target}"
                     continue
@@ -158,7 +160,7 @@ class TestTransformsConf:
                     collection = transforms_conf.get(target, "collection")
                     assert collections.has_section(collection), f"[{target}] names missing collection {collection}"
                     fields = {f.strip() for f in transforms_conf.get(target, "fields_list").split(",")} - {"_key"}
-                    declared = {k[len("field."):] for k in collections.options(collection) if k.startswith("field.")}
+                    declared = {k[len("field.") :] for k in collections.options(collection) if k.startswith("field.")}
                     assert fields <= declared, f"[{target}] fields not in collection: {fields - declared}"
 
     def test_regex_stanzas_have_format(self, transforms_conf: configparser.ConfigParser) -> None:
