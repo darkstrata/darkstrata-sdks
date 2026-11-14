@@ -1,3 +1,10 @@
+## [2.9.1](https://github.com/darkstrata/darkstrata-sdks/compare/v2.9.0...v2.9.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **umbraco:** describe Credential Check hits as stolen credentials from infostealer logs ([#31](https://github.com/darkstrata/darkstrata-sdks/issues/31)) ([76be30d](https://github.com/darkstrata/darkstrata-sdks/commit/76be30dedfe79b9b769b7d7efb92de0865e6aa96))
+
 # [2.9.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.8.0...v2.9.0) (2026-11-14)
 
 
