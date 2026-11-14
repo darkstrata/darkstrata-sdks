@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.8.0...v2.9.0) (2026-11-14)
+
+
+### Features
+
+* **umbraco:** add Umbraco Automate trigger package ([#29](https://github.com/darkstrata/darkstrata-sdks/issues/29)) ([d30152a](https://github.com/darkstrata/darkstrata-sdks/commit/d30152abedc9b3beb8cd7c1fa57ccabe39f47abb))
+
 # [2.8.0](https://github.com/darkstrata/darkstrata-sdks/compare/v2.7.1...v2.8.0) (2026-11-14)
 
 
