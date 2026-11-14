@@ -107,6 +107,7 @@ not in the CMS database.
 | `CheckLogins` | `true` | Check member and backoffice logins. |
 | `LoginAction` | `Deny` | `Deny` rejects the login like a wrong password (lockout rules apply). `Warn` allows it, logs a warning and publishes the notification. |
 | `FailOpen` | `true` | If the DarkStrata API is unreachable, allow the operation. Set `false` to reject instead. |
+| `NotificationTimeout` | `00:00:05` | How long a check waits for notification handlers. A slower handler keeps running in the background. |
 
 ## React to a hit (your workflow)
 
@@ -133,6 +134,10 @@ public class MyComposer : IComposer
         builder.AddNotificationAsyncHandler<CompromisedCredentialDetectedNotification, CompromisedCredentialHandler>();
 }
 ```
+
+Handlers run inside the login or password change. If one throws, the error is logged and the
+check's result stands. If handlers take longer than `NotificationTimeout`, the check stops waiting
+and they finish in the background, so keep slow work (email, HTTP calls) out of the request scope.
 
 ## Tell the person what happened
 

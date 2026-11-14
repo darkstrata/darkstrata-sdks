@@ -27,6 +27,12 @@ public sealed class DarkStrataOptions
 
     /// <summary>When the DarkStrata API is unreachable, allow the operation (true) or reject it (false).</summary>
     public bool FailOpen { get; set; } = true;
+
+    /// <summary>
+    /// How long a check waits for <see cref="CompromisedCredentialDetectedNotification"/> handlers before
+    /// carrying on without them. Slow handlers keep running; their failures are logged, never thrown.
+    /// </summary>
+    public TimeSpan NotificationTimeout { get; set; } = TimeSpan.FromSeconds(5);
 }
 
 public enum LoginAction
