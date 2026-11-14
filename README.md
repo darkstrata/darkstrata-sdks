@@ -318,6 +318,10 @@ Block compromised passwords for Umbraco members and backoffice users, check back
 dotnet add package DarkStrata.CredentialCheck.Umbraco
 ```
 
+On Umbraco 17.4+ with [Umbraco Automate](https://docs.umbraco.com/umbraco-automate), add
+[DarkStrata.CredentialCheck.Umbraco.Automate](./sdks/csharp/src/DarkStrata.CredentialCheck.Umbraco.Automate/README.md)
+for a **Compromised Credential Detected** trigger, so editors can build their own response on the Automate canvas.
+
 ---
 
 ### Laravel Integration
