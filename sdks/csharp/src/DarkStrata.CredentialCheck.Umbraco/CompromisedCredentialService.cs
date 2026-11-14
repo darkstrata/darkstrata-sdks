@@ -33,7 +33,7 @@ public sealed class CompromisedCredentialService
     }
 
     /// <summary>
-    /// Returns true when the pair is in the breach corpus. Returns false when the check is
+    /// Returns true when the pair is in DarkStrata's stolen-credential data. Returns false when the check is
     /// unconfigured or fails and <see cref="DarkStrataOptions.FailOpen"/> is set; throws otherwise.
     /// The result is memoised for the rest of the request, so repeated checks of the same
     /// credentials cost one API call and raise one notification.

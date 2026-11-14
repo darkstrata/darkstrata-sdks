@@ -19,7 +19,7 @@ public sealed class DarkStrataOptions
     /// <summary>Reject compromised passwords when members or backoffice users set or change them.</summary>
     public bool ValidatePasswords { get; set; } = true;
 
-    /// <summary>Check member and backoffice logins against the breach corpus.</summary>
+    /// <summary>Check member and backoffice logins against DarkStrata's stolen-credential data.</summary>
     public bool CheckLogins { get; set; } = true;
 
     /// <summary>What to do when a login uses a compromised password.</summary>

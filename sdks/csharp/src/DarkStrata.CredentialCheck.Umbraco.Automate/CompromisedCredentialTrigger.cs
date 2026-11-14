@@ -26,7 +26,7 @@ public sealed class CompromisedCredentialTriggerOutput
 /// Automate discovers it by attribute; no registration needed.
 /// </summary>
 [Trigger(TriggerAlias, "Compromised Credential Detected",
-    Description = "A checked email and password pair was found in the DarkStrata breach corpus.",
+    Description = "A login or password change used an email and password pair DarkStrata found in infostealer logs.",
     Group = "DarkStrata",
     Icon = "icon-alert")]
 public sealed class CompromisedCredentialTrigger(TriggerInfrastructure infrastructure)

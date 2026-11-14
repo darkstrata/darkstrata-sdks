@@ -1,7 +1,7 @@
 # DarkStrata Credential Check for Umbraco Automate
 
 Adds a **Compromised Credential Detected** trigger to [Umbraco Automate](https://docs.umbraco.com/umbraco-automate),
-so editors can build their own response to a breached login or password change on the canvas:
+so editors can build their own response to a login or password change that uses stolen credentials on the canvas:
 alert the security team in Slack, open a ticket, call a webhook, without writing a notification handler.
 
 It fires whenever [DarkStrata.CredentialCheck.Umbraco](https://www.nuget.org/packages/DarkStrata.CredentialCheck.Umbraco)
